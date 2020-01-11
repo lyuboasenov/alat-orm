@@ -1,0 +1,5 @@
+!/.vs
+/.vs/*
+!/.vs/modulized-php/config
+!/.vs/ProjectSettings.json
+!/.vs/slnx.sqlite
