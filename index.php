@@ -8,34 +8,33 @@ $connection = new Connection('connection-string');
 $connection->open();
 
 $repository = new DbRepository($connection);
-$users = $repository->getUsers()->findById(12);
+$parents = $repository->getSet('ParentEntity')->findById(12);
 
-foreach($users as $user) {
-    write('<div>');
-    write('<p><b>id:</b>' . $user->id . '</p>');
-    write('<p><b>username:</b>' . $user->username . '</p>');
-    write('<p><b>age:</b>' . $user->age . '</p>');
-    write('<p><b>role:</b>' . $user->role . '</p>');
+foreach($parents as $parent) {
+   write('<div>');
+   write('<p><b>id:</b>' . $parent->id . '</p>');
+   write('<p><b>name:</b>' . $parent->name . '</p>');
 
-    foreach($user->emails as $email) {
-    write('<p><b>email:</b>' . $email->email . '</p>');
-    }
+   foreach($parent->children as $child) {
+      write('<p><b>child:</b>' . $child->name . '</p>');
+   }
 
-    foreach($user->emails as $email) {
-    write('<p><b>email:</b>' . $email->email . '</p>');
-    }
+   write('<p><b>child:</b>' . $parent->children->elementAt(1)->name . '</p>');
 
-    write('</div>');
+   write('</div>');
 }
 
-$newUser = new User();
-$newUser->username = 'pesho';
-$newUser->password = 'pesho1';
-$newUser->role = 99;
-$repository->getUsers()->add($newUser);
+$newParent = new ParentEntity();
+$newParent->name = 'new-parent';
 
-$updateUser = $users[0];
-$updateUser->age = 2;
+$repository->getSet('ParentEntity')->add($newParent);
+
+$newChild = new ChildEntity();
+$newChild->name = 'new-child';
+
+$updateParent = $parents[0];
+$updateParent->name = 'update-parent';
+$updateParent->children->append($newChild);
 
 $repository->save();
 

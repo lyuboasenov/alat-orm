@@ -4,16 +4,12 @@ require_once(__DIR__ . '\..\domain\IRepository.php');
 require_once('DbSet.php');
 
 class DbRepository implements IRepository {
-   private $set;
+   private $sets;
    private $db;
 
    public function __construct($db) {
       $this-> db = $db;
       $this->sets = array();
-   }
-
-   public function getUsers() {
-      return $this->getSet('User');
    }
 
    public function getSet($type) {

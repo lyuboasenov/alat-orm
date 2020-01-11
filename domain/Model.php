@@ -1,5 +1,7 @@
 <?php
 
+require_once('ReferenceEntities.php');
+
 abstract class Model {
    protected $metadata;
    protected $values;
@@ -7,6 +9,7 @@ abstract class Model {
 
    private $isInitialized = false;
    private $isDirty = false;
+   private $references;
 
    private $repository;
 
@@ -18,8 +21,10 @@ abstract class Model {
       $this->initialize();
 
       if (array_key_exists($name, $this->metadata)) {
-         if ($this->metadata[$name] instanceof ForeignKeyField) {
-            return $this->getForeignKeyField($name);
+         if ($this->metadata[$name] instanceof ReferenceField) {
+            return $this->getReferenceField($name);
+         } else if ($this->metadata[$name] instanceof ForeignKeyField) {
+            return $this->values[$name]->id;
          } else {
             return $this->values[$name];
          }
@@ -45,11 +50,45 @@ abstract class Model {
       $this->repository = $repository;
    }
 
+   public function addReference($model) {
+      if (!$this->hasFieldOfType(get_class($model)) && !$model->hasFieldOfType(get_class($this))) {
+         throw new ErrorException('Unkown reference from "' . get_class($this) . '" to "' . get_class($model) . '".');
+      }
+
+      $thisToRefField = $this->getFieldOfType(get_class($model));
+      $refToThisField = $model->getFieldOfType(get_class($this));
+
+      if ($thisToRefField instanceof ManyOfReferenceField && $refToThisField instanceof ManyOfReferenceField) {
+         // assosiation
+      }
+
+      if ($thisToRefField instanceof OneOfReferenceField || $refToThisField instanceof ManyOfReferenceField) {
+         $name = strtolower(get_class($model)) . '_id';
+         $this->metadata[$name] = new ForeignKeyField($name);
+         $this->values[$name] = $model;
+      }
+   }
+
+   public function hasFieldOfType($type) {
+      return !is_null($this->getFieldOfType($type));
+   }
+
+   public function getFieldOfType($type) {
+      $this->initialize();
+      foreach($this->getMetadata() as $name => $field) {
+         if ($field instanceof ReferenceField && $field->getReferenceType() == $type) {
+            return $field;
+         }
+      }
+
+      return null;
+   }
+
    protected function setField($name, $value, $riseIsDirty, $riseIdSetError) {
       $this->initialize();
 
       if (array_key_exists($name, $this->metadata)) {
-         if ($this->metadata[$name] instanceof ForeignKeyField) {
+         if ($this->metadata[$name] instanceof ReferenceField) {
             throw new ErrorException('Foreign key fields can not be set.');
          } else {
             if ($this->metadata[$name]->isValid($value)) {
@@ -79,7 +118,7 @@ abstract class Model {
          $this->foreignKeyValues = array();
          foreach($this->getFields() as $field) {
             $this->metadata[$field->getName()] = $field;
-            if (!($field instanceof ForeignKeyField)) {
+            if (!($field instanceof ReferenceField)) {
                $this->values[$field->getName()] = !is_null($field->getDefault()) ? $field->getDefault() : null;
             }
          }
@@ -87,7 +126,22 @@ abstract class Model {
       }
    }
 
-   private function getForeignKeyField($name) {
+   private function getReferencesMetadata() {
+      $result = array();
+      if (!is_null($this->references)) {
+         foreach($this->references as $ref) {
+
+         }
+      }
+
+      return $result;
+   }
+
+   private function getMetadataWithoutReferences() {
+
+   }
+
+   private function getReferenceField($name) {
       $field = $this->metadata[$name];
       if (is_null($this->repository)) {
          throw new ErrorException('Object not tracked by repository.');
@@ -96,7 +150,9 @@ abstract class Model {
       if (!array_key_exists($name, $this->foreignKeyValues)) {
          $set = $this->repository->getSet($field->getReferenceType());
 
-         $this->foreignKeyValues[$name] = $set->find($field->getReferenceField() . '=' . $this->id);
+         $referenceEntities = $set->find(strtolower(get_class($this)) . '_' . 'id' . '=' . $this->id);
+         $this->foreignKeyValues[$name] =
+            new ReferenceEntities($this->repository, $field, $this, $referenceEntities);
       }
 
       return $this->foreignKeyValues[$name];

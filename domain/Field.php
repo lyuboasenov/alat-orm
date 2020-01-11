@@ -36,6 +36,12 @@ class IntegerField extends Field {
    }
 }
 
+class ForeignKeyField extends IntegerField {
+   public function __construct($name) {
+      parent::__construct($name, false, null);
+   }
+}
+
 class FloatField extends Field {
    public function isValid($value) {
       return is_float($value);
@@ -111,36 +117,30 @@ class CharField extends Field {
    }
 }
 
-abstract class ForeignKeyField extends Field {
-   public function __construct($name, $null, $default) {
-      parent::__construct($name, $null, $default);
-   }
-}
-
-class OneToManyForeignKeyField extends ForeignKeyField {
+abstract class ReferenceField extends Field {
    private $referenceType;
-   private $referenceField;
 
-   public function __construct($name, $null, $default, $referenceType, $referenceField) {
+   public function __construct($name, $null, $default, $referenceType) {
       parent::__construct($name, $null, $default);
       $this->referenceType = $referenceType;
-      $this->referenceField = $referenceField;
-   }
-
-   public function isValid($value) {
-      return false;
    }
 
    public function getReferenceType() {
       return $this->referenceType;
    }
+}
 
-   public function getReferenceField() {
-      return $this->referenceField;
+class ManyOfReferenceField extends ReferenceField {
+   public function __construct($name, $null, $default, $referenceType) {
+      parent::__construct($name, $null, $default, $referenceType);
+   }
+
+   public function isValid($value) {
+      return false;
    }
 }
 
-class ManyToManyForeignKeyField extends ForeignKeyField {
+class OneOfReferenceField extends ReferenceField {
    public function isValid($value) {
       return false;
    }

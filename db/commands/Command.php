@@ -21,12 +21,12 @@ class Command {
    public function executeQuery() {
       $this->log();
 
-      if (strpos($this->command, 'FROM User') !== false) {
-         return array(array('id' => 12, 'username' => 'ogi', 'age' => 1, 'role' => 1000));
-      } else if (strpos($this->command, 'FROM Email') !== false) {
+      if (strpos($this->command, 'FROM ParentEntity') !== false) {
+         return array(array('id' => 12, 'name' => 'parent'));
+      } else if (strpos($this->command, 'FROM ChildEntity') !== false) {
          return array(
-            array('id' => 12, 'email' => 'ogi@asenov.com'),
-            array('id' => 13, 'email' => 'ogi@gmail.com'),
+            array('id' => 12, 'name' => 'child-1'),
+            array('id' => 13, 'name' => 'child-2'),
          );
       }
    }

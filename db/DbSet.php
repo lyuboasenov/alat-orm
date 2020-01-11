@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__ . '\..\domain\set.php');
-require_once('mapper.php');
+require_once(__DIR__ . '\..\domain\Set.php');
+require_once('Mapper.php');
 
 class DbSet extends Set {
    private $db;
@@ -33,7 +33,7 @@ class DbSet extends Set {
 
       $command = null;
       if (is_null($model->id)){
-         throw new ErrorException('Object with no id can\'t be deleted. "' . $obj . '"');
+         throw new ErrorException('Object with no id can\'t be deleted. "' . $model . '"');
       } else {
          $command = $mapper->getDeleteCommandBuilder()->build($this->db);
       }
@@ -52,7 +52,7 @@ class DbSet extends Set {
       $mapper = Mapper::fromDomainType($this->domainModelType);
       $command = $mapper->getSelectCommandBuilder()
          ->where($criteria)
-         ->build($db);
+         ->build($this->db);
 
       $data = $command->executeQuery();
       $result = array();
