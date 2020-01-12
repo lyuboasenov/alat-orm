@@ -57,7 +57,7 @@ class DbSet extends Set {
       $data = $command->executeQuery();
       $result = array();
       foreach($data as $entry) {
-         $result[] = $this->domainModelType::fromRawData($entry);
+         $result[] = new $this->domainModelType($entry);
       }
 
       return $result;

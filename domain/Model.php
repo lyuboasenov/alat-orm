@@ -126,21 +126,6 @@ abstract class Model {
       }
    }
 
-   private function getReferencesMetadata() {
-      $result = array();
-      if (!is_null($this->references)) {
-         foreach($this->references as $ref) {
-
-         }
-      }
-
-      return $result;
-   }
-
-   private function getMetadataWithoutReferences() {
-
-   }
-
    private function getReferenceField($name) {
       $field = $this->metadata[$name];
       if (is_null($this->repository)) {

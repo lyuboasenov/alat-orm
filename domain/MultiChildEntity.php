@@ -3,8 +3,7 @@
 require_once('Model.php');
 require_once('Field.php');
 
-class ParentEntity extends Model {
-
+class MultiChildEntity extends Model {
    public function __construct($data = null) {
       if (!is_null($data)) {
          $this->initialize();
@@ -17,8 +16,8 @@ class ParentEntity extends Model {
    protected function getFields() {
       return [
          new IntegerField('id', false, null),
-         new CharField('name', false, null, 15),
-         new ManyOfReferenceField('children', false, null, 'ChildEntity'),
+         new CharField('name', false, null, 50),
+         new ManyOfReferenceField('parents', false, null, 'MultiParentEntity'),
       ];
    }
 }

@@ -4,15 +4,13 @@ require_once('Model.php');
 require_once('Field.php');
 
 class ChildEntity extends Model {
-   public static function fromRawData($data) {
-      $child = new ChildEntity();
-      $child->initialize();
-
-      foreach($data as $name => $value) {
-         $child->setField($name, $value, false, false);
+   public function __construct($data = null) {
+      if (!is_null($data)) {
+         $this->initialize();
+         foreach($data as $name => $value) {
+            $this->setField($name, $value, false, false);
+         }
       }
-
-      return $child;
    }
 
    protected function getFields() {

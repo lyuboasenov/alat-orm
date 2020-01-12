@@ -28,6 +28,16 @@ class Command {
             array('id' => 12, 'name' => 'child-1'),
             array('id' => 13, 'name' => 'child-2'),
          );
+      } else if (strpos($this->command, 'FROM MultiChildEntity') !== false) {
+         return array(
+            array('id' => 12, 'name' => 'multi-child-1'),
+            array('id' => 13, 'name' => 'multi-child-2'),
+         );
+      } else if (strpos($this->command, 'FROM MultiParentEntity') !== false) {
+         return array(
+            array('id' => 22, 'name' => 'multi-parent-1'),
+            array('id' => 33, 'name' => 'multi-parent-2'),
+         );
       }
    }
 
