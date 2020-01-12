@@ -26,6 +26,24 @@ class DbSet extends Set {
       if ($result != 1) {
          throw new ErrorException('Invalid row count on insert/update "' . $result . '".');
       }
+
+      $model->clean();
+   }
+
+   protected function saveObjectReferencesInternal(IModel $model, $references) {
+      $mapper = Mapper::fromDomainModel($model);
+
+      $command = null;
+      if (is_null($model->id)){
+         $command = $mapper->getInsertCommandBuilder()->build($this->db);
+      } else {
+         $command = $mapper->getUpdateCommandBuilder()->build($this->db);
+      }
+
+      $result = $command->executeScalar();
+      if ($result != 1) {
+         throw new ErrorException('Invalid row count on insert/update "' . $result . '".');
+      }
    }
 
    protected function removeObjectInternal(IModel $model) {
@@ -77,8 +95,6 @@ class DbSet extends Set {
 
       return $result;
    }
-
-
 
    protected function findInternal($criteria) {
       $mapper = Mapper::fromDomainType($this->domainModelType);

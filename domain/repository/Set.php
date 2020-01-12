@@ -27,8 +27,8 @@ abstract class Set {
 
       if ($obj instanceof $this->domainModelType) {
          if (array_search($obj, $this->trackedObjects) === false) {
-            $obj = new ModelReferencingDecorator($obj, $this, $this->repository);
-            $obj = new ModelTrackingDecorator($obj, $this, $this->repository);
+            $obj = new ModelReferencingDecorator($obj, $this->repository);
+            $obj = new ModelTrackingDecorator($obj);
             $this->trackedObjects[] = $obj;
 
             return $obj;
@@ -78,10 +78,19 @@ abstract class Set {
       foreach($this->removedObjects as $obj) {
          $this->removeObjectInternal($obj);
       }
+
+      // TODO: save references
+      // foreach($this->trackedObjects as $obj) {
+      //    if ($obj->getHasDirtyReferences()) {
+      //       foreach($obj->getReferences() as $references)
+      //       $this->saveObjectReferencesInternal($obj, $references);
+      //    }
+      // }
    }
 
    protected abstract function removeObjectInternal(IModel $obj);
    protected abstract function saveObjectInternal(IModel $obj);
+   protected abstract function saveObjectReferencesInternal(IModel $obj, $references);
    protected abstract function findInternal($criteria);
    protected abstract function findByIdInternal($id);
    protected abstract function findByParentInternal($parent);

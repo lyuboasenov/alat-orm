@@ -2,16 +2,12 @@
 
 class ReferenceEntities implements IteratorAggregate {
    private $repository;
-   private $field;
    private $type;
    private $items;
-   private $parent;
 
-   public function __construct($repository, $field, $parent, $array) {
+   public function __construct($repository, $type, $array) {
       $this->repository = $repository;
-      $this->field = $field;
-      $this->type = $this->field->getReferenceType();
-      $this->parent = $parent;
+      $this->type = $type;
       $this->items = $array;
 
       if(!is_null($this->items)) {
@@ -56,5 +52,9 @@ class ReferenceEntities implements IteratorAggregate {
 
    public function getIterator() {
       return new ArrayIterator($this->items);
+   }
+
+   public function getType() {
+      return $this->type;
    }
 }

@@ -18,4 +18,8 @@ class ModelTrackingDecorator extends ModelDecorator {
    public function getIsDirty() {
       return $this->isDirty || is_null($this->model->id);
    }
+
+   public function clean() {
+      $this->isDirty = false;
+   }
 }

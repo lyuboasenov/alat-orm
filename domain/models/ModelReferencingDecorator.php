@@ -3,17 +3,15 @@
 require_once('ModelDecorator.php');
 
 class ModelReferencingDecorator extends ModelDecorator {
-   private $set;
    private $repository;
 
    private $initialized = false;
    private $fields;
    protected $values;
 
-   public function __construct($model, $set, $repository) {
+   public function __construct($model, $repository) {
       parent::__construct($model);
 
-      $this->set = $set;
       $this->repository = $repository;
    }
 
@@ -26,12 +24,12 @@ class ModelReferencingDecorator extends ModelDecorator {
       }
    }
 
-   public function getSet() {
-      return $this->set;
+   public function getReferences() {
+      return array_values($this->values);
    }
 
-   public function getRepository() {
-      return $this->repository;
+   public function getHasDirtyReferences() {
+      return array_count_values($this->values) > 0;
    }
 
    private function initialize() {
@@ -63,7 +61,7 @@ class ModelReferencingDecorator extends ModelDecorator {
 
          $referenceEntities = $set->findByParent($this);
          $this->values[$name] =
-            new ReferenceEntities($this->repository, $field, $this, $referenceEntities);
+            new ReferenceEntities($this->repository, $field->getReferenceType(), $referenceEntities);
       }
 
       return $this->values[$name];
