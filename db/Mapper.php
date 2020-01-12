@@ -1,8 +1,10 @@
 <?php
 
-require_once(__DIR__ . '/../domain/ParentEntity.php');
-require_once(__DIR__ . '/../domain/ChildEntity.php');
-require_once(__DIR__ . '/../domain/Field.php');
+require_once(__DIR__ . '/../domain/entities/ParentEntity.php');
+require_once(__DIR__ . '/../domain/entities/ChildEntity.php');
+require_once(__DIR__ . '/../domain/entities/MultiParentEntity.php');
+require_once(__DIR__ . '/../domain/entities/MultiChildEntity.php');
+require_once(__DIR__ . '/../domain/models/Field.php');
 require_once(__DIR__ . '/commands/SelectBuilder.php');
 require_once(__DIR__ . '/commands/InsertBuilder.php');
 require_once(__DIR__ . '/commands/UpdateBuilder.php');
@@ -21,8 +23,29 @@ class Mapper {
       return new Mapper($modelType, new $modelType);
    }
 
-   public static function fromDomainModel(Model $model) {
-      return new Mapper(get_class($model), $model);
+   public static function fromDomainModel(IModel $model) {
+      return new Mapper($model->getType(), $model);
+   }
+
+   public static function getMapptingType($sourceType, $refType) {
+      $sourceToRefField = Mapper::getReferenceFieldOfType($sourceType, $refType);
+      $refToSourceField = Mapper::getReferenceFieldOfType($refType, $sourceType);
+
+      if ($sourceToRefField instanceof ManyOfReferenceField && $refToSourceField instanceof ManyOfReferenceField) {
+         return MappingType::Association;
+      } else if ($sourceToRefField instanceof ManyOfReferenceField || $refToSourceField instanceof OneOfReferenceField) {
+         return MappingType::ForeignKey;
+      } else {
+         throw new ErrorException('Unkown reference from "' . $sourceType . '" to "' . $refType . '".');
+      }
+   }
+
+   public static function getAssociationTableName($type1, $type2) {
+      if (strcmp($type1, $type2) < 0) {
+         return $type1 . $type2;
+      } else {
+         return $type2 . $type1;
+      }
    }
 
    public function getSelectCommandBuilder() {
@@ -61,4 +84,24 @@ class Mapper {
    public function getDeleteCommandBuilder() {
       return DeleteBuilder::from($this->table)->where('id=' . $this->model->id);
    }
+
+   private static function getReferenceFieldOfType($sourceType, $fieldType) {
+      $sourceDescrType = $sourceType . 'Descriptor';
+      $fields = (new $sourceDescrType)->getFields();
+      $result = null;
+
+      foreach($fields as $field) {
+         if ($field instanceof ReferenceField) {
+            $result = $field;
+            break;
+         }
+      }
+
+      return $result;
+   }
+}
+
+abstract class MappingType {
+   const Association = 0;
+   const ForeignKey = 1;
 }

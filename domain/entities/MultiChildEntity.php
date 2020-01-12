@@ -1,19 +1,17 @@
 <?php
 
-require_once('Model.php');
-require_once('Field.php');
+require_once(__DIR__ . '\..\models\Model.php');
+require_once(__DIR__ . '\..\models\ModelDescriptor.php');
+require_once(__DIR__ . '\..\models\Field.php');
 
 class MultiChildEntity extends Model {
    public function __construct($data = null) {
-      if (!is_null($data)) {
-         $this->initialize();
-         foreach($data as $name => $value) {
-            $this->setField($name, $value, false, false);
-         }
-      }
+      parent::__construct($data);
    }
+}
 
-   protected function getFields() {
+class MultiChildEntityDescriptor extends ModelDescriptor {
+   public function getFields() {
       return [
          new IntegerField('id', false, null),
          new CharField('name', false, null, 50),

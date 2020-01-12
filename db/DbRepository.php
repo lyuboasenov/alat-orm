@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '\..\domain\IRepository.php');
+require_once(__DIR__ . '\..\domain\repository\IRepository.php');
 require_once('DbSet.php');
 
 class DbRepository implements IRepository {

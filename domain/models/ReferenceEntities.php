@@ -16,8 +16,8 @@ class ReferenceEntities implements IteratorAggregate {
 
       if(!is_null($this->items)) {
          foreach($this->items as $item) {
-            if (!($item instanceof $this->type)) {
-               throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . get_class($item) . '".');
+            if ($item->getType() != $this->type) {
+               throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . $item->getType() . '".');
             }
          }
       }
@@ -25,13 +25,11 @@ class ReferenceEntities implements IteratorAggregate {
 
    public function append($value) {
       if (!($value instanceof $this->type)) {
-         throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . get_class($value) . '".');
+         throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . $value->getType() . '".');
       }
 
       if (!array_search($value, $this->items)) {
          $set = $this->repository->getSet($this->type);
-
-         $value->addReference($this->parent);
          $set->add($value);
 
          $this->items[] = $value;
@@ -40,7 +38,7 @@ class ReferenceEntities implements IteratorAggregate {
 
    public function remove($value) {
       if (!($value instanceof $this->type)) {
-         throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . get_class($value) . '".');
+         throw new ErrorException('Invalid item type: expected "' . $this->type . '", given "' . $value->getType() . '".');
       }
 
       if (array_search($value, $this->items)) {

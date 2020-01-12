@@ -1,6 +1,6 @@
 <?php
 
-require_once(__DIR__ . '\..\domain\Set.php');
+require_once(__DIR__ . '\..\domain\repository\Set.php');
 require_once('Mapper.php');
 
 class DbSet extends Set {
@@ -12,7 +12,7 @@ class DbSet extends Set {
       $this->db = $db;
    }
 
-   protected function saveObjectInternal(Model $model) {
+   protected function saveObjectInternal(IModel $model) {
       $mapper = Mapper::fromDomainModel($model);
 
       $command = null;
@@ -28,7 +28,7 @@ class DbSet extends Set {
       }
    }
 
-   protected function removeObjectInternal(Model $model) {
+   protected function removeObjectInternal(IModel $model) {
       $mapper = Mapper::fromDomainModel($model);
 
       $command = null;
@@ -47,6 +47,38 @@ class DbSet extends Set {
    protected function findByIdInternal($id) {
       return $this->findInternal('id=' . $id);
    }
+
+   protected function findByParentInternal($parent) {
+      $mappingType = Mapper::getMapptingType($parent->getType(), $this->domainModelType);
+
+      $mapper = Mapper::fromDomainType($this->domainModelType);
+      $builder = $mapper->getSelectCommandBuilder();
+
+      $parentType = $parent->getType();
+
+      if ($mappingType == MappingType::ForeignKey) {
+         $builder
+            ->join($parentType, $parentType . '.id=' . $this->domainModelType . '.' . strtolower($parentType) . '_id')
+            ->where($parentType . '.id=' . $parent->id);
+      } else if ($mappingType == MappingType::Association) {
+         $associationTable = Mapper::getAssociationTableName($parentType, $this->domainModelType);
+
+         $builder
+            ->join($associationTable, $this->domainModelType . '.id=' . $associationTable . '.' . strtolower($this->domainModelType) . '_id')
+            ->join($parentType, $parentType . '.id=' . $associationTable . '.' . strtolower($parentType) . '_id')
+            ->where($parentType . '.id=' . $parent->id);
+      }
+
+      $data = $builder->build($this->db)->executeQuery();
+      $result = array();
+      foreach($data as $entry) {
+         $result[] = new $this->domainModelType($entry);
+      }
+
+      return $result;
+   }
+
+
 
    protected function findInternal($criteria) {
       $mapper = Mapper::fromDomainType($this->domainModelType);
