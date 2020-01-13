@@ -71,8 +71,19 @@ $newChild = $updateParent->children->append($newChild);
 
 write('</div>');
 
-
 $repository->save();
+
+write('<div> DB generation');
+
+write('<code>');
+
+write(db\DbGenerator::getDbGenerationScript());
+
+write('</code>');
+
+write('</div>');
+
+
 
 function write($str) {
    echo $str;
