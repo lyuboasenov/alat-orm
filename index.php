@@ -1,16 +1,14 @@
 <?php
 
-require_once (__DIR__.'\db\dbRepository.php');
-require_once (__DIR__.'\db\Connection.php');
+include 'autoload.php';
 
-
-$connection = new Connection('connection-string');
+$connection = new db\Connection('connection-string');
 $connection->open();
 
 write('<div> Foreign Key');
 
-$repository = new DbRepository($connection);
-$parents = $repository->getSet('ParentEntity')->findById(12);
+$repository = new db\DbRepository($connection);
+$parents = $repository->getSet('domain\entities\ParentEntity')->findById(12);
 
 foreach($parents as $parent) {
    write('<div>');
@@ -26,12 +24,12 @@ foreach($parents as $parent) {
    write('</div>');
 }
 
-$newParent = new ParentEntity();
+$newParent = new domain\entities\ParentEntity();
 $newParent->name = 'new-parent';
 
-$newParent = $repository->getSet('ParentEntity')->add($newParent);
+$newParent = $repository->getSet('domain\entities\ParentEntity')->add($newParent);
 
-$newChild = new ChildEntity();
+$newChild = new domain\entities\ChildEntity();
 $newChild->name = 'new-child';
 
 $updateParent = $parents[0];
@@ -43,7 +41,7 @@ write('</div>');
 write('<div> Association');
 
 //$repository = new DbRepository($connection);
-$parents = $repository->getSet('MultiParentEntity')->findById(12);
+$parents = $repository->getSet('domain\entities\MultiParentEntity')->findById(12);
 
 foreach($parents as $parent) {
    write('<div>');
@@ -59,12 +57,12 @@ foreach($parents as $parent) {
    write('</div>');
 }
 
-$newParent = new MultiParentEntity();
+$newParent = new domain\entities\MultiParentEntity();
 $newParent->name = 'new-parent';
 
-$newParent = $repository->getSet('MultiParentEntity')->add($newParent);
+$newParent = $repository->getSet('domain\entities\MultiParentEntity')->add($newParent);
 
-$newChild = new MultiChildEntity();
+$newChild = new domain\entities\MultiChildEntity();
 $newChild->name = 'new-child';
 
 $updateParent = $parents[0];
