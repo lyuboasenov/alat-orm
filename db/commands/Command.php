@@ -41,9 +41,15 @@ class Command {
       }
    }
 
+   public function newId() {
+      return random_int(0, 1000000);
+   }
+
    private function log(){
       echo '<pre>';
       var_dump('SQL COMMAND EXECUTED: {' . $this->command .'}');
       echo '</pre>';
    }
+
+
 }

@@ -22,7 +22,11 @@ class DbRepository implements IRepository {
 
    public function save() {
       foreach($this->sets as $type => $set) {
-         $set->save();
+         $set->saveModels();
+      }
+
+      foreach($this->sets as $type => $set) {
+         $set->saveReferences();
       }
    }
 }

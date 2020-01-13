@@ -55,9 +55,6 @@ abstract class Model implements IModel {
             throw new ErrorException('Foreign key fields can not be set.');
          } else {
             if ($this->metadata[$name]->isValid($value)) {
-               if ($riseIdSetError && $name == 'id') {
-                  throw new ErrorException ('Id can not be set explicitly.');
-               }
                $this->values[$name] = $value;
             } else {
                throw new ErrorException('Value "' . $value . '" not valid for field "' . $name . '".');

@@ -27,22 +27,45 @@ class DbSet extends Set {
          throw new ErrorException('Invalid row count on insert/update "' . $result . '".');
       }
 
+      if (is_null($model->id)){
+         $model->id = $command->newId();
+      }
+
       $model->clean();
    }
 
    protected function saveObjectReferencesInternal(IModel $model, $references) {
-      $mapper = Mapper::fromDomainModel($model);
+      $modelType = $model->getType();
+      $refType = $references->getType();
 
-      $command = null;
-      if (is_null($model->id)){
-         $command = $mapper->getInsertCommandBuilder()->build($this->db);
-      } else {
-         $command = $mapper->getUpdateCommandBuilder()->build($this->db);
-      }
+      $mappingType = Mapper::getMapptingType($modelType, $refType);
 
-      $result = $command->executeScalar();
-      if ($result != 1) {
-         throw new ErrorException('Invalid row count on insert/update "' . $result . '".');
+      if ($mappingType == MappingType::ForeignKey_ParentChild) {
+         foreach($references as $ref) {
+            UpdateBuilder::table($refType)
+               ->set(Mapper::getReferenceColumnName($modelType), $model->id)
+               ->where('id=' . $ref->id)
+               ->build($this->db)
+               ->executeNonQuery();
+         }
+      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
+         UpdateBuilder::table($modelType)
+            ->set(Mapper::getReferenceColumnName($refType), $ref->id)
+            ->where('id=' . $model->id)
+            ->build($this->db)
+            ->executeNonQuery();
+      } else if ($mappingType == MappingType::Association) {
+         $associationTable = Mapper::getAssociationTableName($modelType, $refType);
+         DeleteBuilder::from($associationTable)
+            ->where(mapper::getReferenceColumnName($modelType) . '=' . $model->id)
+            ->build($this->db)->executeNonQuery();
+
+         foreach($references as $ref) {
+            InsertBuilder::into($associationTable)
+               ->value(Mapper::getReferenceColumnName($modelType), $model->id)
+               ->value(Mapper::getReferenceColumnName($refType), $ref->id)
+               ->build($this->db)->executeNonQuery();
+         }
       }
    }
 
@@ -66,25 +89,28 @@ class DbSet extends Set {
       return $this->findInternal('id=' . $id);
    }
 
-   protected function findByParentInternal($parent) {
-      $mappingType = Mapper::getMapptingType($parent->getType(), $this->domainModelType);
+   protected function findByReferenceInternal($ref) {
+      $mappingType = Mapper::getMapptingType($ref->getType(), $this->domainModelType);
 
       $mapper = Mapper::fromDomainType($this->domainModelType);
       $builder = $mapper->getSelectCommandBuilder();
 
-      $parentType = $parent->getType();
+      $parentType = $ref->getType();
 
-      if ($mappingType == MappingType::ForeignKey) {
+      if ($mappingType == MappingType::ForeignKey_ParentChild) {
          $builder
-            ->join($parentType, $parentType . '.id=' . $this->domainModelType . '.' . strtolower($parentType) . '_id')
-            ->where($parentType . '.id=' . $parent->id);
+            ->where(Mapper::getReferenceColumnName($parentType) . '=' . $ref->id);
+      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
+         $builder
+            ->join($parentType, $parentType . '.id=' . $this->domainModelType . '.' . Mapper::getReferenceColumnName($parentType))
+            ->where($parentType . '.id=' . $ref->id);
       } else if ($mappingType == MappingType::Association) {
          $associationTable = Mapper::getAssociationTableName($parentType, $this->domainModelType);
 
          $builder
-            ->join($associationTable, $this->domainModelType . '.id=' . $associationTable . '.' . strtolower($this->domainModelType) . '_id')
-            ->join($parentType, $parentType . '.id=' . $associationTable . '.' . strtolower($parentType) . '_id')
-            ->where($parentType . '.id=' . $parent->id);
+            ->join($associationTable, $this->domainModelType . '.id=' . $associationTable . '.' . Mapper::getReferenceColumnName($this->domainModelType))
+            ->join($parentType, $parentType . '.id=' . $associationTable . '.' . Mapper::getReferenceColumnName($parentType))
+            ->where($parentType . '.id=' . $ref->id);
       }
 
       $data = $builder->build($this->db)->executeQuery();

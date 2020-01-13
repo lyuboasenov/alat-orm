@@ -64,11 +64,11 @@ abstract class Set {
       return $this->addMultiple($this->findByIdInternal($id));
    }
 
-   public function findByParent($parent) {
-      return $this->addMultiple($this->findByParentInternal($parent));
+   public function findByReference($ref) {
+      return $this->addMultiple($this->findByReferenceInternal($ref));
    }
 
-   public function save() {
+   public function saveModels() {
       foreach($this->trackedObjects as $obj) {
          if ($obj->getIsDirty()) {
             $this->saveObjectInternal($obj);
@@ -78,14 +78,15 @@ abstract class Set {
       foreach($this->removedObjects as $obj) {
          $this->removeObjectInternal($obj);
       }
+   }
 
-      // TODO: save references
-      // foreach($this->trackedObjects as $obj) {
-      //    if ($obj->getHasDirtyReferences()) {
-      //       foreach($obj->getReferences() as $references)
-      //       $this->saveObjectReferencesInternal($obj, $references);
-      //    }
-      // }
+   public function saveReferences() {
+      foreach($this->trackedObjects as $obj) {
+         if ($obj->getHasDirtyReferences()) {
+            foreach($obj->getReferences() as $references)
+            $this->saveObjectReferencesInternal($obj, $references);
+         }
+      }
    }
 
    protected abstract function removeObjectInternal(IModel $obj);
@@ -93,6 +94,6 @@ abstract class Set {
    protected abstract function saveObjectReferencesInternal(IModel $obj, $references);
    protected abstract function findInternal($criteria);
    protected abstract function findByIdInternal($id);
-   protected abstract function findByParentInternal($parent);
+   protected abstract function findByReferenceInternal($ref);
 
 }

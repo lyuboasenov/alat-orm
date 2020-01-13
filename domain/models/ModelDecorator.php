@@ -18,6 +18,10 @@ class ModelDecorator implements IModel {
       $this->model->__set($name, $value);
    }
 
+   public function __call($method, $args) {
+      return $this->model->$method($args);
+   }
+
    public function getType() {
       return $this->model->getType();
    }

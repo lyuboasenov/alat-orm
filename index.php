@@ -42,7 +42,7 @@ write('</div>');
 
 write('<div> Association');
 
-$repository = new DbRepository($connection);
+//$repository = new DbRepository($connection);
 $parents = $repository->getSet('MultiParentEntity')->findById(12);
 
 foreach($parents as $parent) {

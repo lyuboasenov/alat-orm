@@ -33,8 +33,10 @@ class Mapper {
 
       if ($sourceToRefField instanceof ManyOfReferenceField && $refToSourceField instanceof ManyOfReferenceField) {
          return MappingType::Association;
-      } else if ($sourceToRefField instanceof ManyOfReferenceField || $refToSourceField instanceof OneOfReferenceField) {
-         return MappingType::ForeignKey;
+      } else if ($sourceToRefField instanceof ManyOfReferenceField) {
+         return MappingType::ForeignKey_ParentChild;
+      } else if ($refToSourceField instanceof OneOfReferenceField) {
+         return MappingType::ForeignKey_ChildParent;
       } else {
          throw new ErrorException('Unkown reference from "' . $sourceType . '" to "' . $refType . '".');
       }
@@ -46,6 +48,10 @@ class Mapper {
       } else {
          return $type2 . $type1;
       }
+   }
+
+   public static function getReferenceColumnName($type) {
+      return strtolower($type) . '_id';
    }
 
    public function getSelectCommandBuilder() {
@@ -103,5 +109,6 @@ class Mapper {
 
 abstract class MappingType {
    const Association = 0;
-   const ForeignKey = 1;
+   const ForeignKey_ParentChild = 1;
+   const ForeignKey_ChildParent = 2;
 }

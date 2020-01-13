@@ -29,7 +29,7 @@ class ModelReferencingDecorator extends ModelDecorator {
    }
 
    public function getHasDirtyReferences() {
-      return array_count_values($this->values) > 0;
+      return count(array_keys($this->values)) > 0;
    }
 
    private function initialize() {
@@ -59,7 +59,7 @@ class ModelReferencingDecorator extends ModelDecorator {
       if (!array_key_exists($name, $this->values)) {
          $set = $this->repository->getSet($field->getReferenceType());
 
-         $referenceEntities = $set->findByParent($this);
+         $referenceEntities = $set->findByReference($this);
          $this->values[$name] =
             new ReferenceEntities($this->repository, $field->getReferenceType(), $referenceEntities);
       }
