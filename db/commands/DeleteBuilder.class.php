@@ -7,7 +7,7 @@ class DeleteBuilder {
    private $where;
 
    private function __construct($table) {
-      $this->table = $table;
+      $this->table = BuilderUtils::formatTableName($table);
       $this->fields = array();
    }
 

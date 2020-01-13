@@ -7,7 +7,7 @@ class InsertBuilder {
    private $fields;
 
    private function __construct($table) {
-      $this->table = $table;
+      $this->table = BuilderUtils::formatTableName($table);
       $this->fields = array();
    }
 

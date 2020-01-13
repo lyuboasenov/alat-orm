@@ -9,7 +9,7 @@ class SelectBuilder {
 
    private function __construct($table) {
       $this->tables = array();
-      $this->tables[$table] = array('MAIN', null);
+      $this->tables[BuilderUtils::formatTableName($table)] = array('MAIN', null);
 
       $this->fields = array();
    }
@@ -31,12 +31,14 @@ class SelectBuilder {
    }
 
    public function tableField($table, $field) {
-      $this->fields[$table][] = $field;
+      $formatedTable = BuilderUtils::formatTableName($table);
+      $this->fields[$formatedTable][] = $field;
       return $this;
    }
 
    public function tableFields($table, $fields) {
-      $this->fields[$table] = array_merge($this->fields[$table], $fields);
+      $formatedTable = BuilderUtils::formatTableName($table);
+      $this->fields[$formatedTable] = array_merge($this->fields[$formatedTable], $fields);
       return $this;
    }
 
@@ -46,17 +48,20 @@ class SelectBuilder {
    }
 
    public function join($table, $condition) {
-      $this->tables[$table] = array('INNER JOIN', $condition);
+      $formatedTable = BuilderUtils::formatTableName($table);
+      $this->tables[$formatedTable] = array('INNER JOIN', $condition);
       return $this;
    }
 
    public function leftJoin($table, $condition) {
-      $this->tables[$table] = array('LEFT JOIN', $condition);
+      $formatedTable = BuilderUtils::formatTableName($table);
+      $this->tables[$formatedTable] = array('LEFT JOIN', $condition);
       return $this;
    }
 
    public function rightJoin($table, $condition) {
-      $this->tables[$table] = array('RIGHT JOIN', $condition);
+      $formatedTable = BuilderUtils::formatTableName($table);
+      $this->tables[$formatedTable] = array('RIGHT JOIN', $condition);
       return $this;
    }
 

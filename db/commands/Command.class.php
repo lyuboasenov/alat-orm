@@ -23,19 +23,19 @@ class Command {
    public function executeQuery() {
       $this->log();
 
-      if (strpos($this->command, 'FROM domain\entities\ParentEntity') !== false) {
+      if (strpos($this->command, 'FROM ParentEntity') !== false) {
          return array(array('id' => 12, 'name' => 'parent'));
-      } else if (strpos($this->command, 'FROM domain\entities\ChildEntity') !== false) {
+      } else if (strpos($this->command, 'FROM ChildEntity') !== false) {
          return array(
             array('id' => 12, 'name' => 'child-1'),
             array('id' => 13, 'name' => 'child-2'),
          );
-      } else if (strpos($this->command, 'FROM domain\entities\MultiChildEntity') !== false) {
+      } else if (strpos($this->command, 'FROM MultiChildEntity') !== false) {
          return array(
             array('id' => 12, 'name' => 'multi-child-1'),
             array('id' => 13, 'name' => 'multi-child-2'),
          );
-      } else if (strpos($this->command, 'FROM domain\entities\MultiParentEntity') !== false) {
+      } else if (strpos($this->command, 'FROM MultiParentEntity') !== false) {
          return array(
             array('id' => 22, 'name' => 'multi-parent-1'),
             array('id' => 33, 'name' => 'multi-parent-2'),
