@@ -12,8 +12,4 @@ interface IReadBuilder extends ICommandBuilder {
    public function where($where);
 
    public function join($type, $condition);
-
-   public function leftJoin($type, $condition);
-
-   public function rightJoin($type, $condition);
 }

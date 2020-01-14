@@ -52,6 +52,4 @@ class SqlCommand implements \alat\repository\commands\ICommand {
       var_dump('SQL COMMAND EXECUTED: {' . $this->command .'}');
       echo '</pre>';
    }
-
-
 }

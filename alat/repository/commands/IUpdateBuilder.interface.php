@@ -6,5 +6,5 @@ interface IUpdateBuilder extends ICommandBuilder {
    public function set($field, $value);
    public function sets($fields);
 
-   public function where($where);
+   public function withId($id);
 }

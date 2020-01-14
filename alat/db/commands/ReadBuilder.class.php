@@ -54,26 +54,11 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
       return $this;
    }
 
-   public function leftJoin($table, $condition) {
-      $formatedTable = BuilderUtils::formatTableName($table);
-      $this->tables[$formatedTable] = array('LEFT JOIN', $condition);
-      return $this;
-   }
-
-   public function rightJoin($table, $condition) {
-      $formatedTable = BuilderUtils::formatTableName($table);
-      $this->tables[$formatedTable] = array('RIGHT JOIN', $condition);
-      return $this;
-   }
-
-
    public function build(){
       $tables = array_keys($this->tables);
 
       $tableSpecificFields = array();
       foreach($this->fields as $table => $fields) {
-         $tableIndex = array_search($table, $tables);
-
          foreach($fields as $field) {
             $tableSpecificFields[] = $table . '.' . $field;
          }

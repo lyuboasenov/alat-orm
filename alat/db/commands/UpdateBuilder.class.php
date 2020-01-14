@@ -5,7 +5,7 @@ namespace alat\db\commands;
 class UpdateBuilder extends CommandBuilder implements \alat\repository\commands\IUpdateBuilder {
    private $table;
    private $fields;
-   private $where;
+   private $id;
 
    private function __construct($table, $connection) {
       parent::__construct($connection);
@@ -30,8 +30,8 @@ class UpdateBuilder extends CommandBuilder implements \alat\repository\commands\
       return $this;
    }
 
-   public function where($where) {
-      $this->where = $where;
+   public function withId($id) {
+      $this->id = $id;
       return $this;
    }
 
@@ -43,8 +43,8 @@ class UpdateBuilder extends CommandBuilder implements \alat\repository\commands\
          array_keys($this->fields)
       ));
 
-      if (!is_null($this->where)) {
-         $commandText .= ' WHERE ' . $this->where;
+      if (!is_null($this->id)) {
+         $commandText .= ' WHERE id=' . $this->id;
       }
 
       return new SqlCommand($this->connection, $commandText);

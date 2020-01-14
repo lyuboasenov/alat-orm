@@ -122,20 +122,20 @@ class Set {
          foreach($references as $ref) {
             $this->builderFactory->update($refType)
                ->set(Mapper::getReferenceColumnName($modelType), $model->id)
-               ->where('id=' . $ref->id)
+               ->withId($ref->id)
                ->build($this->db)
                ->executeNonQuery();
          }
       } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
          $this->builderFactory->update($modelType)
             ->set(Mapper::getReferenceColumnName($refType), $ref->id)
-            ->where('id=' . $model->id)
+            ->withId($model->id)
             ->build($this->db)
             ->executeNonQuery();
       } else if ($mappingType == MappingType::Association) {
          $associationTable = Mapper::getAssociationTableName($modelType, $refType);
          $this->builderFactory->delete($associationTable)
-            ->where(mapper::getReferenceColumnName($modelType) . '=' . $model->id)
+            ->with(mapper::getReferenceColumnName($modelType), $model->id)
             ->build($this->db)->executeNonQuery();
 
          foreach($references as $ref) {

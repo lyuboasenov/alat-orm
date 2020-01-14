@@ -1,7 +1,9 @@
 <?php
 
 $connection = new alat\db\SqlConnection('connection-string');
-$repository = new alat\db\Repository($connection);
+
+//$repository = new alat\db\Repository($connection);
+$repository = new \alat\fs\Repository(__DIR__ . '\\repo\\');
 
 write('<div> Foreign Key');
 

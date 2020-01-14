@@ -47,7 +47,7 @@ class Mapper {
    }
 
    public static function getReferenceColumnName($type) {
-      return strtolower($type) . '_id';
+      return strtolower(\alat\common\Type::stripNamespace($type)) . '_id';
    }
 
    public function getReadBuilder() {
@@ -80,11 +80,11 @@ class Mapper {
          }
       }
 
-      return $builder->where('id=' . $this->model->id);
+      return $builder->withId($this->model->id);
    }
 
    public function getDeleteBuilder() {
-      return $this->builderFactory->delete($this->type)->where('id=' . $this->model->id);
+      return $this->builderFactory->delete($this->type)->withId($this->model->id);
    }
 
    private static function getReferenceFieldOfType($sourceType, $fieldType) {
@@ -93,7 +93,7 @@ class Mapper {
       $result = null;
 
       foreach($fields as $field) {
-         if ($field instanceof fields\ReferenceField) {
+         if ($field instanceof fields\ReferenceField && $field->getReferenceType() == $fieldType) {
             $result = $field;
             break;
          }
