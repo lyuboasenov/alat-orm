@@ -26,7 +26,6 @@ class CreateBuilder extends CommandBuilder implements \alat\repository\commands\
    }
 
    public function build(){
-      $commandText = 'c/' . $this->type . '/0/' . json_encode(ksort($this->fields));
-      return new FsCommand($this->path, $commandText);
+      return new CreateCommand($this->path, $this->type, $this->fields);
    }
 }

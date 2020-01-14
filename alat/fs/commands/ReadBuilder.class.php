@@ -5,7 +5,10 @@ namespace alat\fs\commands;
 class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IReadBuilder {
    private $types;
    private $fields;
-   private $where;
+   private $filterType;
+   private $filterField;
+   private $filterOperator;
+   private $filterValue;
 
    public function __construct($type, $path) {
       parent::__construct($path);
@@ -27,26 +30,17 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
       return $this;
    }
 
-   public function typeField($type, $field) {
-      $formatedTable = \alat\common\Type::stripNamespace($type);
-      $this->fields[$formatedTable][] = $field;
+   public function filter($type, $field, $operator, $value) {
+      $this->filterType = $type;
+      $this->filterField = $field;
+      $this->filterOperator = $operator;
+      $this->filterValue = $value;
       return $this;
    }
 
-   public function typeFields($type, $fields) {
-      $formatedTable = \alat\common\Type::stripNamespace($type);
-      $this->fields[$formatedTable] = array_merge($this->fields[$formatedTable], $fields);
-      return $this;
-   }
-
-   public function where($where) {
-      $this->where = $where;
-      return $this;
-   }
-
-   public function join($type, $condition) {
-      $formatedTable = \alat\common\Type::stripNamespace($type);
-      $this->types[$formatedTable] = array('INNER JOIN', $condition);
+   public function join($type, $field, $parentType, $parentField) {
+      $formatedType = \alat\common\Type::stripNamespace($type);
+      $this->types[$formatedType] = [ $type => $field, $parentType => $parentField ];
       return $this;
    }
 
@@ -74,6 +68,6 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
          $commandText .= ' WHERE ' . $this->where;
       }
 
-      return new FsCommand($this->connection, $commandText);
+      return new ReadCommand($this->connection, $commandText);
    }
 }

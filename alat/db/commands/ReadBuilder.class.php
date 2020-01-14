@@ -31,26 +31,16 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
       return $this;
    }
 
-   public function typeField($table, $field) {
-      $formatedTable = BuilderUtils::formatTableName($table);
-      $this->fields[$formatedTable][] = $field;
+   public function filter($table, $field, $operator, $value) {
+      $table = BuilderUtils::formatTableName($table);
+      $this->where = $table . '.' . $field . $this->formatOperatorAndValue($operator, $value);
       return $this;
    }
 
-   public function typeFields($table, $fields) {
-      $formatedTable = BuilderUtils::formatTableName($table);
-      $this->fields[$formatedTable] = array_merge($this->fields[$formatedTable], $fields);
-      return $this;
-   }
-
-   public function where($where) {
-      $this->where = $where;
-      return $this;
-   }
-
-   public function join($table, $condition) {
-      $formatedTable = BuilderUtils::formatTableName($table);
-      $this->tables[$formatedTable] = array('INNER JOIN', $condition);
+   public function join($table, $field, $parentTable, $parentField) {
+      $table = BuilderUtils::formatTableName($table);
+      $parentTable = BuilderUtils::formatTableName($parentTable);
+      $this->tables[$table] = array('INNER JOIN', $table . '.' . $field . '=' . $parentTable . '.' . $parentField);
       return $this;
    }
 
@@ -79,5 +69,23 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
       }
 
       return new SqlCommand($this->connection, $commandText);
+   }
+
+   private function formatOperatorAndValue($operator, $value) {
+      if ($operator == \alat\common\ComparisonOperator::lt) {
+         return '<' . $value;
+      } else if ($operator == \alat\common\ComparisonOperator::lte) {
+         return '<=' . $value;
+      } else if ($operator == \alat\common\ComparisonOperator::eq) {
+         return '=' . $value;
+      } else if ($operator == \alat\common\ComparisonOperator::gte) {
+         return '>=' . $value;
+      } else if ($operator == \alat\common\ComparisonOperator::gt) {
+         return '>' . $value;
+      } else if ($operator == \alat\common\ComparisonOperator::contains) {
+         return ' like \'*' . $value . '*\'';
+      } else {
+         throw new \ErrorException('Unknown operator.');
+      }
    }
 }

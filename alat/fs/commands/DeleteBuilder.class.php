@@ -29,7 +29,6 @@ class DeleteBuilder extends CommandBuilder implements \alat\repository\commands\
          $id = $key . '=' . $id;
       }
 
-      $commandText = 'd/' . $this->type . '/' . $id . '/';
-      return new FsCommand($this->path, $commandText);
+      return new DeleteCommand($this->path, $this->type, $id);
    }
 }

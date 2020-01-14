@@ -2,27 +2,19 @@
 
 namespace alat\fs\commands;
 
-class FsCommand implements \alat\repository\commands\ICommand {
-   private $command;
-   private $path;
+class Command implements \alat\repository\commands\ICommand {
+   protected $command;
+   protected $path;
 
-   public function __construct($path, $command) {
+   public function __construct($path) {
       $this->path = $path;
-      $this->command = $command;
    }
 
-   public function executeNonQuery() {
+   public function execute() {
       $this->log();
    }
 
-   public function executeScalar() {
-      $this->log();
-      return 1;
-   }
-
-   public function executeQuery() {
-      $this->log();
-
+   public function getResult() {
       if (strpos($this->command, 'FROM ParentEntity') !== false) {
          return array(array('id' => 12, 'name' => 'parent'));
       } else if (strpos($this->command, 'FROM ChildEntity') !== false) {
@@ -43,7 +35,7 @@ class FsCommand implements \alat\repository\commands\ICommand {
       }
    }
 
-   public function newlyCreatedId() {
+   public function getId() {
       return random_int(0, 1000000);
    }
 

@@ -32,7 +32,6 @@ class UpdateBuilder extends CommandBuilder implements \alat\repository\commands\
    }
 
    public function build() {
-      $commandText = 'u/' . $this->type . '/' . $this->id . '/' . json_encode(ksort($this->fields));
-      return new FsCommand($this->connection, $commandText);
+      return new UpdateCommand($this->path, $this->type, $this->id, $this->fields);
    }
 }

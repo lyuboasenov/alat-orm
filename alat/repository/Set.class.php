@@ -95,18 +95,15 @@ class Set {
 
       $command = null;
       if (is_null($model->id)){
-         $command = $mapper->getCreateBuilder()->build($this->db);
+         $command = $mapper->getCreateBuilder()->build();
       } else {
-         $command = $mapper->getUpdateBuilder()->build($this->db);
+         $command = $mapper->getUpdateBuilder()->build();
       }
 
-      $result = $command->executeScalar();
-      if ($result != 1) {
-         throw new \ErrorException('Invalid row count on insert/update "' . $result . '".');
-      }
+      $command->execute();
 
       if (is_null($model->id)){
-         $model->id = $command->newlyCreatedId();
+         $model->id = $command->getId();
       }
 
       $model->clean();
@@ -123,92 +120,104 @@ class Set {
             $this->builderFactory->update($refType)
                ->set(Mapper::getReferenceColumnName($modelType), $model->id)
                ->withId($ref->id)
-               ->build($this->db)
-               ->executeNonQuery();
+               ->build()
+               ->execute();
          }
       } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
          $this->builderFactory->update($modelType)
             ->set(Mapper::getReferenceColumnName($refType), $ref->id)
             ->withId($model->id)
-            ->build($this->db)
-            ->executeNonQuery();
+            ->build()
+            ->execute();
       } else if ($mappingType == MappingType::Association) {
          $associationTable = Mapper::getAssociationTableName($modelType, $refType);
          $this->builderFactory->delete($associationTable)
             ->with(mapper::getReferenceColumnName($modelType), $model->id)
-            ->build($this->db)->executeNonQuery();
+            ->build()
+            ->execute();
 
          foreach($references as $ref) {
             $this->builderFactory->create($associationTable)
                ->value(Mapper::getReferenceColumnName($modelType), $model->id)
                ->value(Mapper::getReferenceColumnName($refType), $ref->id)
-               ->build($this->db)->executeNonQuery();
+               ->build()
+               ->execute();
          }
       }
    }
 
    private function removeObjectInternal(models\IModel $model) {
-      $mapper = Mapper::fromDomainModel($this->builderFactory, $model);
-
-      $command = null;
       if (is_null($model->id)){
          throw new \ErrorException('Object with no id can\'t be deleted. "' . $model . '"');
       } else {
-         $command = $mapper->getDeleteBuilder()->build($this->db);
-      }
-
-      $result = $command->executeScalar();
-      if ($result != 1) {
-         throw new \ErrorException('Invalid row count on delete "' . $result . '".');
+         $mapper = Mapper::fromDomainModel($this->builderFactory, $model);
+         $mapper->getDeleteBuilder()->build()->execute();
       }
    }
 
    private function findByIdInternal($id) {
-      return $this->findInternal('id=' . $id);
-   }
+      $type = $this->domainModelType;
+      $mapper = Mapper::fromDomainType($this->builderFactory, $type);
+      $command = $mapper->getReadBuilder()
+         ->filter($type, 'id', \alat\common\ComparisonOperator::eq, $id)
+         ->build();
 
-   private function findByReferenceInternal($ref) {
-      $mappingType = Mapper::getMappingType($ref->getType(), $this->domainModelType);
+      $command->execute();
 
-      $mapper = Mapper::fromDomainType($this->builderFactory, $this->domainModelType);
-      $builder = $mapper->getReadBuilder();
-
-      $parentType = $ref->getType();
-
-      if ($mappingType == MappingType::ForeignKey_ParentChild) {
-         $builder
-            ->where(Mapper::getReferenceColumnName($parentType) . '=' . $ref->id);
-      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
-         $builder
-            ->join($parentType, $parentType . '.id=' . $this->domainModelType . '.' . Mapper::getReferenceColumnName($parentType))
-            ->where($parentType . '.id=' . $ref->id);
-      } else if ($mappingType == MappingType::Association) {
-         $associationTable = Mapper::getAssociationTableName($parentType, $this->domainModelType);
-
-         $builder
-            ->join($associationTable, $this->domainModelType . '.id=' . $associationTable . '.' . Mapper::getReferenceColumnName($this->domainModelType))
-            ->join($parentType, $parentType . '.id=' . $associationTable . '.' . Mapper::getReferenceColumnName($parentType))
-            ->where($parentType . '.id=' . $ref->id);
-      }
-
-      $data = $builder->build($this->db)->executeQuery();
       $result = array();
-      foreach($data as $entry) {
+      foreach($command->getResult() as $entry) {
          $result[] = new $this->domainModelType($entry);
       }
 
       return $result;
    }
 
+   private function findByReferenceInternal($ref) {
+      $type = $this->domainModelType;
+      $refType = $ref->getType();
+
+      $mappingType = Mapper::getMappingType($refType, $type);
+
+      $mapper = Mapper::fromDomainType($this->builderFactory, $type);
+      $builder = $mapper->getReadBuilder();
+
+      if ($mappingType == MappingType::ForeignKey_ParentChild) {
+         $builder
+            ->filter($type, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
+      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
+         $field = Mapper::getReferenceColumnName($refType);
+         $builder
+            ->filter($type, 'id', \alat\common\ComparisonOperator::eq, $ref->$field);
+      } else if ($mappingType == MappingType::Association) {
+         $associationTable = Mapper::getAssociationTableName($refType, $type);
+
+         $builder
+            ->join($associationTable, Mapper::getReferenceColumnName($type), $type, 'id')
+            ->filter($associationTable, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
+      }
+
+      $command = $builder->build();
+      $command->execute();
+
+      $result = array();
+      foreach($command->getResult() as $entry) {
+         $result[] = new $type($entry);
+      }
+
+      return $result;
+   }
+
    private function findInternal($criteria) {
+      throw new \ErrorException('Unsupported method.');
+
       $mapper = Mapper::fromDomainType($this->builderFactory, $this->domainModelType);
       $command = $mapper->getReadBuilder()
          ->where($criteria)
-         ->build($this->db);
+         ->build();
 
-      $data = $command->executeQuery();
+      $command->execute();
       $result = array();
-      foreach($data as $entry) {
+      foreach($command->getResult() as $entry) {
          $result[] = new $this->domainModelType($entry);
       }
 

@@ -6,10 +6,7 @@ interface IReadBuilder extends ICommandBuilder {
    public function field($field);
    public function fields($fields);
 
-   public function typeField($type, $field);
-   public function typeFields($type, $fields);
+   public function filter($type, $field, $operator, $value);
 
-   public function where($where);
-
-   public function join($type, $condition);
+   public function join($type, $field, $parentType, $parentField);
 }
