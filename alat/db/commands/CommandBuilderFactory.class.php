@@ -2,20 +2,26 @@
 
 namespace alat\db\commands;
 
-class CommandBuilderFactory implements ICommandBuilderFactory {
-   public function insertInto($table) {
-      return InsertBuilder::into($table);
+class CommandBuilderFactory implements \alat\repository\commands\ICommandBuilderFactory {
+   private $connection;
+
+   public function __construct($connection) {
+      $this->connection = $connection;
    }
 
-   public function selectFrom($table) {
-      return SelectBuilder::from($table);
+   public function create($type) {
+      return CreateBuilder::into($type, $this->connection);
    }
 
-   public function update($table) {
-      return UpdateBuilder::table($table);
+   public function read($type) {
+      return ReadBuilder::from($type, $this->connection);
    }
 
-   public function deleteFrom($table) {
-      return DeleteBuilder::from($table);
+   public function update($type) {
+      return UpdateBuilder::table($type, $this->connection);
+   }
+
+   public function delete($type) {
+      return DeleteBuilder::from($type, $this->connection);
    }
 }

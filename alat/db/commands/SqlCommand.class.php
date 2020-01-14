@@ -2,7 +2,7 @@
 
 namespace alat\db\commands;
 
-class Command {
+class SqlCommand implements \alat\repository\commands\ICommand {
    private $command;
    private $connection;
 
@@ -43,7 +43,7 @@ class Command {
       }
    }
 
-   public function newId() {
+   public function newlyCreatedId() {
       return random_int(0, 1000000);
    }
 

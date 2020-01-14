@@ -2,18 +2,19 @@
 
 namespace alat\db\commands;
 
-class UpdateBuilder implements IUpdateBuilder {
+class UpdateBuilder extends CommandBuilder implements \alat\repository\commands\IUpdateBuilder {
    private $table;
    private $fields;
    private $where;
 
-   private function __construct($table) {
+   private function __construct($table, $connection) {
+      parent::__construct($connection);
       $this->table = BuilderUtils::formatTableName($table);
       $this->fields = array();
    }
 
-   public static function table($table) {
-      return new UpdateBuilder($table);
+   public static function table($table, $connection) {
+      return new UpdateBuilder($table, $connection);
    }
 
    public function set($field, $value) {
@@ -34,7 +35,7 @@ class UpdateBuilder implements IUpdateBuilder {
       return $this;
    }
 
-   public function build($connection){
+   public function build() {
       $commandText = 'UPDATE ' . $this->table . ' SET ';
       $commandText .= implode(', ', array_map(
          function ($v, $k) { return sprintf("%s='%s'", $k, $v); },
@@ -46,6 +47,6 @@ class UpdateBuilder implements IUpdateBuilder {
          $commandText .= ' WHERE ' . $this->where;
       }
 
-      return new Command($connection, $commandText);
+      return new SqlCommand($this->connection, $commandText);
    }
 }

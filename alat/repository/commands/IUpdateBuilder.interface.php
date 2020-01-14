@@ -1,6 +1,6 @@
 <?php
 
-namespace alat\db\commands;
+namespace alat\repository\commands;
 
 interface IUpdateBuilder extends ICommandBuilder {
    public function set($field, $value);

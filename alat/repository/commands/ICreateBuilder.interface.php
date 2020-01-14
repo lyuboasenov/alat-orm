@@ -1,8 +1,8 @@
 <?php
 
-namespace alat\db\commands;
+namespace alat\repository\commands;
 
-interface IInsertBuilder extends ICommandBuilder {
+interface ICreateBuilder extends ICommandBuilder {
    public function value($field, $value);
    public function values($fields);
 }

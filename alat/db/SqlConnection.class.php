@@ -2,14 +2,10 @@
 
 namespace alat\db;
 
-class Connection {
+class SqlConnection {
    private $connectionString;
 
    public function __construct($connectionString) {
       $this->connectionString = $connectionString;
-   }
-
-   public function open() {
-
    }
 }

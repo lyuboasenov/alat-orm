@@ -1,8 +1,7 @@
 <?php
 
-$connection = new alat\db\Connection('connection-string');
-$connection->open();
-$repository = new alat\db\DbRepository($connection);
+$connection = new alat\db\SqlConnection('connection-string');
+$repository = new alat\db\Repository($connection);
 
 write('<div> Foreign Key');
 
@@ -38,7 +37,6 @@ write('</div>');
 
 write('<div> Association');
 
-//$repository = new DbRepository($connection);
 $parents = $repository->getSet('demo\domain\models\MultiParentEntity')->findById(12);
 
 foreach($parents as $parent) {

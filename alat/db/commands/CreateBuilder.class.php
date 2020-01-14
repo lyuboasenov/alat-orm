@@ -2,17 +2,18 @@
 
 namespace alat\db\commands;
 
-class InsertBuilder implements IInsertBuilder {
+class CreateBuilder extends CommandBuilder implements \alat\repository\commands\ICreateBuilder {
    private $table;
    private $fields;
 
-   private function __construct($table) {
+   private function __construct($table, $connection) {
+      parent::__construct($connection);
       $this->table = BuilderUtils::formatTableName($table);
       $this->fields = array();
    }
 
-   public static function into($table) {
-      return new InsertBuilder($table);
+   public static function into($table, $connection) {
+      return new CreateBuilder($table, $connection);
    }
 
    public function value($field, $value) {
@@ -28,9 +29,9 @@ class InsertBuilder implements IInsertBuilder {
       return $this;
    }
 
-   public function build($connection){
+   public function build(){
       $commandText = 'INSERT INTO ' . $this->table . ' (' . implode(', ', array_keys($this->fields)) . ') VALUES (' . implode(', ', array_values($this->fields)) . ')';
 
-      return new Command($connection, $commandText);
+      return new SqlCommand($this->connection, $commandText);
    }
 }

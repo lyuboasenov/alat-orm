@@ -1,6 +1,6 @@
 <?php
 
-namespace alat\domain\repository;
+namespace alat\repository;
 use alat\domain\models as models;
 
 interface ISet {

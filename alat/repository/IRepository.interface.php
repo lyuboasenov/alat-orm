@@ -1,6 +1,6 @@
 <?php
 
-namespace alat\domain\repository;
+namespace alat\repository;
 
 interface IRepository {
    public function getSet($type);

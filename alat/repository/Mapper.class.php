@@ -1,28 +1,29 @@
 <?php
 
-namespace alat\db;
+namespace alat\repository;
 use alat\domain\models as models;
 use alat\domain\models\fields as fields;
-use alat\db\commands as commands;
 
 class Mapper {
-   private $table;
+   private $type;
    private $model;
+   private $builderFactory;
 
-   private function __construct($table, $model) {
-      $this->table = $table;
+   private function __construct($commandBuilderFactory, $type, $model) {
+      $this->builderFactory = $commandBuilderFactory;
+      $this->type = $type;
       $this->model = $model;
    }
 
-   public static function fromDomainType($modelType) {
-      return new Mapper($modelType, new $modelType);
+   public static function fromDomainType($commandBuilderFactory, $modelType) {
+      return new Mapper($commandBuilderFactory, $modelType, new $modelType);
    }
 
-   public static function fromDomainModel(models\IModel $model) {
-      return new Mapper($model->getType(), $model);
+   public static function fromDomainModel($commandBuilderFactory, models\IModel $model) {
+      return new Mapper($commandBuilderFactory, $model->getType(), $model);
    }
 
-   public static function getMapptingType($sourceType, $refType) {
+   public static function getMappingType($sourceType, $refType) {
       $sourceToRefField = Mapper::getReferenceFieldOfType($sourceType, $refType);
       $refToSourceField = Mapper::getReferenceFieldOfType($refType, $sourceType);
 
@@ -49,8 +50,8 @@ class Mapper {
       return strtolower($type) . '_id';
    }
 
-   public function getSelectCommandBuilder() {
-      $builder =  commands\SelectBuilder::from($this->table);
+   public function getReadBuilder() {
+      $builder = $this->builderFactory->read($this->type);
       foreach($this->model->getMetadata() as $name => $field) {
          if (!($field instanceof fields\ReferenceField)) {
             $builder->field($name);
@@ -60,8 +61,8 @@ class Mapper {
       return $builder;
    }
 
-   public function getInsertCommandBuilder() {
-      $builder = commands\InsertBuilder::into($this->table);
+   public function getCreateBuilder() {
+      $builder = $this->builderFactory->create($this->type);
       foreach($this->model->getMetadata() as $name => $field) {
          if ($name != 'id' && !($field instanceof fields\ReferenceField)) {
             $builder->value($name, $this->model->$name);
@@ -71,8 +72,8 @@ class Mapper {
       return $builder;
    }
 
-   public function getUpdateCommandBuilder() {
-      $builder = commands\UpdateBuilder::table($this->table);
+   public function getUpdateBuilder() {
+      $builder = $this->builderFactory->update($this->type);
       foreach($this->model->getMetadata() as $name => $field) {
          if ($name != 'id' && !($field instanceof fields\ReferenceField) && !($field instanceof fields\ForeignKeyField)) {
             $builder->set($name, $this->model->$name);
@@ -82,8 +83,8 @@ class Mapper {
       return $builder->where('id=' . $this->model->id);
    }
 
-   public function getDeleteCommandBuilder() {
-      return commands\DeleteBuilder::from($this->table)->where('id=' . $this->model->id);
+   public function getDeleteBuilder() {
+      return $this->builderFactory->delete($this->type)->where('id=' . $this->model->id);
    }
 
    private static function getReferenceFieldOfType($sourceType, $fieldType) {

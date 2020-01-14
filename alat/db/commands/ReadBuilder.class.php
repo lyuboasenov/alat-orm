@@ -2,20 +2,21 @@
 
 namespace alat\db\commands;
 
-class SelectBuilder implements ISelectBuilder {
+class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IReadBuilder {
    private $tables;
    private $fields;
    private $where;
 
-   private function __construct($table) {
+   private function __construct($table, $connection) {
+      parent::__construct($connection);
       $this->tables = array();
       $this->tables[BuilderUtils::formatTableName($table)] = array('MAIN', null);
 
       $this->fields = array();
    }
 
-   public static function from($table) {
-      return new SelectBuilder($table);
+   public static function from($table, $connection) {
+      return new ReadBuilder($table, $connection);
    }
 
    public function field($field) {
@@ -30,13 +31,13 @@ class SelectBuilder implements ISelectBuilder {
       return $this;
    }
 
-   public function tableField($table, $field) {
+   public function typeField($table, $field) {
       $formatedTable = BuilderUtils::formatTableName($table);
       $this->fields[$formatedTable][] = $field;
       return $this;
    }
 
-   public function tableFields($table, $fields) {
+   public function typeFields($table, $fields) {
       $formatedTable = BuilderUtils::formatTableName($table);
       $this->fields[$formatedTable] = array_merge($this->fields[$formatedTable], $fields);
       return $this;
@@ -66,7 +67,7 @@ class SelectBuilder implements ISelectBuilder {
    }
 
 
-   public function build($connection){
+   public function build(){
       $tables = array_keys($this->tables);
 
       $tableSpecificFields = array();
@@ -92,6 +93,6 @@ class SelectBuilder implements ISelectBuilder {
          $commandText .= ' WHERE ' . $this->where;
       }
 
-      return new Command($connection, $commandText);
+      return new SqlCommand($this->connection, $commandText);
    }
 }
