@@ -2,7 +2,7 @@
 
 namespace alat\db\commands;
 
-class DeleteBuilder {
+class DeleteBuilder implements IDeleteBuilder {
    private $table;
    private $where;
 

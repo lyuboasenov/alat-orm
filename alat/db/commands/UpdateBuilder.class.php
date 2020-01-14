@@ -2,7 +2,7 @@
 
 namespace alat\db\commands;
 
-class UpdateBuilder {
+class UpdateBuilder implements IUpdateBuilder {
    private $table;
    private $fields;
    private $where;

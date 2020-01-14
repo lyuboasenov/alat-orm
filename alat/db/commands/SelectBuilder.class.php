@@ -2,7 +2,7 @@
 
 namespace alat\db\commands;
 
-class SelectBuilder {
+class SelectBuilder implements ISelectBuilder {
    private $tables;
    private $fields;
    private $where;

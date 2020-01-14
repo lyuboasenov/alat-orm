@@ -2,7 +2,7 @@
 
 namespace alat\db\commands;
 
-class InsertBuilder {
+class InsertBuilder implements IInsertBuilder {
    private $table;
    private $fields;
 
