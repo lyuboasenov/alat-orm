@@ -15,7 +15,7 @@ class DeleteCommand extends \alat\fs\commands\Command {
 
    public function execute() {
       if ($this->field == 'id') {
-         unlink($this->path . PATH_SEPARATOR . $this->type . PATH_SEPARATOR . $this->value);
+         unlink($this->path . DIRECTORY_SEPARATOR . $this->type . DIRECTORY_SEPARATOR . $this->value);
       } else {
          throw new \ErrorException('Deleting by field other than id not implemented.');
       }

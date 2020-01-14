@@ -20,8 +20,6 @@ class CreateCommand extends \alat\fs\commands\Command {
       ksort($this->fields);
       fwrite($handle, json_encode($this->fields));
       fclose($handle);
-
-      parent::execute();
    }
 
    private function getNextFileStream() {

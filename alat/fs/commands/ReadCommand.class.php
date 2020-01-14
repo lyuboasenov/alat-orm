@@ -39,19 +39,19 @@ class ReadCommand extends \alat\fs\commands\Command {
          if ($type != $this->filterType) {
             $joinCondition = $this->types[$this->filterType];
             $parentType = array_key_last($joinCondition);
+            $field = $joinCondition[$parentType];
+            $refField = $joinCondition[$this->filterType];
 
+            // only one join level is supported
             if ($type != $parentType) {
                throw new \ErrorException('Odd join further debuging is needed.');
             }
 
-            foreach(ReadCommand::getIds($this->path, $type) as $id) {
-               $model = ReadCommand::getFileContent($this->path, $type, $id);
-               if (\alat\common\ComparisonOperator::Compare($this->filterOperator, $this->filterValue, $model[$this->filterField])) {
-                  $result[$this->filterType][] = $model;
-               }
+            foreach($result[$this->filterType] as $ref) {
+               // join are made only by id
+               $id = $ref[$refField];
+               $result[$type][] = ReadCommand::getFileContent($this->path, $type, $id);
             }
-
-            throw new \ErrorException('TODO');
          }
       } else {
          foreach(ReadCommand::getIds($this->path, $type) as $id) {
@@ -62,7 +62,6 @@ class ReadCommand extends \alat\fs\commands\Command {
 
       if (!is_null($result[$type])) {
          $this->result = array();
-
 
          foreach($result[$type] as $data) {
             $this->result[] = array_filter($data, function ($key) {
@@ -81,7 +80,7 @@ class ReadCommand extends \alat\fs\commands\Command {
    }
 
    public static function getFileContent($path, $type, $id) {
-      $handle = fopen($path . $type . '\\' . $id, 'r');
+      $handle = fopen($path . $type . DIRECTORY_SEPARATOR . $id, 'r');
       $content = fgets($handle);
       fclose($handle);
 

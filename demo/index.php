@@ -69,15 +69,15 @@ write('</div>');
 
 $repository->save();
 
-write('<div> DB generation');
+// write('<div> DB generation');
 
-write('<code>');
+// write('<code>');
 
-write(alat\db\DbGenerator::getDbGenerationScript());
+// write(alat\db\DbGenerator::getDbGenerationScript());
 
-write('</code>');
+// write('</code>');
 
-write('</div>');
+// write('</div>');
 
 
 

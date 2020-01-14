@@ -32,7 +32,7 @@ class UpdateCommand extends \alat\fs\commands\Command {
    }
 
    private function saveFileContent() {
-      $handle = fopen($this->path . $this->type . '\\' . $this->id, 'w');
+      $handle = fopen($this->path . $this->type . DIRECTORY_SEPARATOR . $this->id, 'w');
       fwrite($handle, json_encode($this->fields));
       fclose($handle);
    }
