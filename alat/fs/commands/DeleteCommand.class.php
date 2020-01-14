@@ -3,14 +3,21 @@
 namespace alat\fs\commands;
 
 class DeleteCommand extends \alat\fs\commands\Command {
-   public function __construct($path, $type, $id) {
+   private $field;
+   private $value;
+
+   public function __construct($path, $type, $field, $value) {
       parent::__construct($path);
       $this->type = $type;
-      $this->id = $id;
+      $this->field = $field;
+      $this->value = $value;
    }
 
    public function execute() {
-      $this->command = 'd/' . $this->type . '/' . $this->id . '/';
-      parent::execute();
+      if ($this->field == 'id') {
+         unlink($this->path . PATH_SEPARATOR . $this->type . PATH_SEPARATOR . $this->value);
+      } else {
+         throw new \ErrorException('Deleting by field other than id not implemented.');
+      }
    }
 }

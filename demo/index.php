@@ -7,7 +7,7 @@ $repository = new \alat\fs\Repository(__DIR__ . '\\repo\\');
 
 write('<div> Foreign Key');
 
-$parents = $repository->getSet('demo\domain\models\ParentEntity')->findById(12);
+$parents = $repository->getSet('demo\domain\models\ParentEntity')->findById(1);
 
 foreach($parents as $parent) {
    write('<div>');
@@ -17,8 +17,6 @@ foreach($parents as $parent) {
    foreach($parent->children as $child) {
       write('<p><b>child:</b>' . $child->name . '</p>');
    }
-
-   write('<p><b>child:</b>' . $parent->children->elementAt(1)->name . '</p>');
 
    write('</div>');
 }
@@ -37,37 +35,37 @@ $newChild = $updateParent->children->append($newChild);
 
 write('</div>');
 
-write('<div> Association');
+// write('<div> Association');
 
-$parents = $repository->getSet('demo\domain\models\MultiParentEntity')->findById(12);
+// $parents = $repository->getSet('demo\domain\models\MultiParentEntity')->findById(12);
 
-foreach($parents as $parent) {
-   write('<div>');
-   write('<p><b>id:</b>' . $parent->id . '</p>');
-   write('<p><b>name:</b>' . $parent->name . '</p>');
+// foreach($parents as $parent) {
+//    write('<div>');
+//    write('<p><b>id:</b>' . $parent->id . '</p>');
+//    write('<p><b>name:</b>' . $parent->name . '</p>');
 
-   foreach($parent->children as $child) {
-      write('<p><b>child:</b>' . $child->name . '</p>');
-   }
+//    foreach($parent->children as $child) {
+//       write('<p><b>child:</b>' . $child->name . '</p>');
+//    }
 
-   write('<p><b>child:</b>' . $parent->children->elementAt(1)->name . '</p>');
+//    write('<p><b>child:</b>' . $parent->children->elementAt(1)->name . '</p>');
 
-   write('</div>');
-}
+//    write('</div>');
+// }
 
-$newParent = new demo\domain\models\MultiParentEntity();
-$newParent->name = 'new-parent';
+// $newParent = new demo\domain\models\MultiParentEntity();
+// $newParent->name = 'new-parent';
 
-$newParent = $repository->getSet('demo\domain\models\MultiParentEntity')->add($newParent);
+// $newParent = $repository->getSet('demo\domain\models\MultiParentEntity')->add($newParent);
 
-$newChild = new demo\domain\models\MultiChildEntity();
-$newChild->name = 'new-child';
+// $newChild = new demo\domain\models\MultiChildEntity();
+// $newChild->name = 'new-child';
 
-$updateParent = $parents[0];
-$updateParent->name = 'update-parent';
-$newChild = $updateParent->children->append($newChild);
+// $updateParent = $parents[0];
+// $updateParent->name = 'update-parent';
+// $newChild = $updateParent->children->append($newChild);
 
-write('</div>');
+// write('</div>');
 
 $repository->save();
 

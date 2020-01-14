@@ -15,12 +15,25 @@ class UpdateCommand extends \alat\fs\commands\Command {
    }
 
    public function execute() {
+      $fileFields = ReadCommand::getFileContent($this->path, $this->type, $this->id);
+
+      foreach($fileFields as $key => $value) {
+         if (!array_key_exists($key, $this->fields)) {
+            $this->fields[$key] = $value;
+         }
+      }
+
       ksort($this->fields);
-      $this->command = 'u/' . $this->type . '/' . $this->id . '/' . json_encode($this->fields);
-      parent::execute();
+      $this->saveFileContent();
    }
 
    public function getId() {
       return $this->id;
+   }
+
+   private function saveFileContent() {
+      $handle = fopen($this->path . $this->type . '\\' . $this->id, 'w');
+      fwrite($handle, json_encode($this->fields));
+      fclose($handle);
    }
 }

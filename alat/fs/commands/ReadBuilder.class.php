@@ -13,7 +13,7 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
    public function __construct($type, $path) {
       parent::__construct($path);
       $this->types = array();
-      $this->types[\alat\common\Type::stripNamespace($type)] = array('MAIN', null);
+      $this->types[\alat\common\Type::stripNamespace($type)] = null;
 
       $this->fields = array();
    }
@@ -31,6 +31,7 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
    }
 
    public function filter($type, $field, $operator, $value) {
+      $type = \alat\common\Type::stripNamespace($type);
       $this->filterType = $type;
       $this->filterField = $field;
       $this->filterOperator = $operator;
@@ -39,8 +40,9 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
    }
 
    public function join($type, $field, $parentType, $parentField) {
-      $formatedType = \alat\common\Type::stripNamespace($type);
-      $this->types[$formatedType] = [ $type => $field, $parentType => $parentField ];
+      $type = \alat\common\Type::stripNamespace($type);
+      $parentType = \alat\common\Type::stripNamespace($parentType);
+      $this->types[$type] = [ $type => $field, $parentType => $parentField ];
       return $this;
    }
 
@@ -68,6 +70,6 @@ class ReadBuilder extends CommandBuilder implements \alat\repository\commands\IR
          $commandText .= ' WHERE ' . $this->where;
       }
 
-      return new ReadCommand($this->connection, $commandText);
+      return new ReadCommand($this->path, $this->types, $this->fields, $this->filterType, $this->filterField, $this->filterOperator, $this->filterValue);
    }
 }
