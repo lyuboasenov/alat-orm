@@ -57,16 +57,22 @@ class Set {
       }
    }
 
+   public function all() {
+      return $this->getModels($this->getReadBuilder());
+   }
+
    public function find($criteria) {
-      return $this->addMultiple($this->findInternal($criteria));
+      //return $this->addMultiple($this->findInternal($criteria));
    }
 
    public function findById($id) {
-      return $this->addMultiple($this->findByIdInternal($id));
+      return $this->getModels($this->getReadBuilder()
+         ->filter($this->domainModelType, 'id', \alat\common\ComparisonOperator::eq, $id));
    }
 
    public function findByReference($ref) {
-      return $this->addMultiple($this->findByReferenceInternal($ref));
+      $mapper = Mapper::fromDomainType($this->builderFactory, $this->domainModelType);
+      return $this->getModels($mapper->getReferenceReadBuilder($ref));
    }
 
    public function saveModels() {
@@ -155,70 +161,19 @@ class Set {
       }
    }
 
-   private function findByIdInternal($id) {
-      $type = $this->domainModelType;
-      $mapper = Mapper::fromDomainType($this->builderFactory, $type);
-      $command = $mapper->getReadBuilder()
-         ->filter($type, 'id', \alat\common\ComparisonOperator::eq, $id)
-         ->build();
-
-      $command->execute();
-
-      $result = array();
-      foreach($command->getResult() as $entry) {
-         $result[] = new $this->domainModelType($entry);
-      }
-
-      return $result;
+   private function getReadBuilder() {
+      $mapper = Mapper::fromDomainType($this->builderFactory, $this->domainModelType);
+      return $mapper->getReadBuilder();
    }
 
-   private function findByReferenceInternal($ref) {
-      $type = $this->domainModelType;
-      $refType = $ref->getType();
-
-      $mappingType = Mapper::getMappingType($refType, $type);
-
-      $mapper = Mapper::fromDomainType($this->builderFactory, $type);
-      $builder = $mapper->getReadBuilder();
-
-      if ($mappingType == MappingType::ForeignKey_ParentChild) {
-         $builder
-            ->filter($type, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
-      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
-         $field = Mapper::getReferenceColumnName($refType);
-         $builder
-            ->filter($type, 'id', \alat\common\ComparisonOperator::eq, $ref->$field);
-      } else if ($mappingType == MappingType::Association) {
-         $associationTable = Mapper::getAssociationTableName($refType, $type);
-
-         $builder
-            ->join($associationTable, Mapper::getReferenceColumnName($type), $type, 'id')
-            ->filter($associationTable, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
-      }
-
+   private function getModels($builder) {
       $command = $builder->build();
       $command->execute();
 
       $result = array();
       foreach($command->getResult() as $entry) {
-         $result[] = new $type($entry);
-      }
-
-      return $result;
-   }
-
-   private function findInternal($criteria) {
-      throw new \ErrorException('Unsupported method.');
-
-      $mapper = Mapper::fromDomainType($this->builderFactory, $this->domainModelType);
-      $command = $mapper->getReadBuilder()
-         ->where($criteria)
-         ->build();
-
-      $command->execute();
-      $result = array();
-      foreach($command->getResult() as $entry) {
-         $result[] = new $this->domainModelType($entry);
+         $model = new $this->domainModelType($entry);
+         $result[] = $this->add($model);
       }
 
       return $result;

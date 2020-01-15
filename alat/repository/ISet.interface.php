@@ -8,6 +8,7 @@ interface ISet {
 
    public function remove(models\Model $model);
 
+   public function all();
    public function find($criteria);
    public function findById($id);
    public function findByParent($parent);

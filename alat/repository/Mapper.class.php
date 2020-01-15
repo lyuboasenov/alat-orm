@@ -61,6 +61,31 @@ class Mapper {
       return $builder;
    }
 
+   public function getReferenceReadBuilder($ref) {
+      $type = $this->type;
+      $refType = $ref->getType();
+
+      $builder = $this->getReadBuilder();
+
+      $mappingType = Mapper::getMappingType($refType, $type);
+      if ($mappingType == MappingType::ForeignKey_ParentChild) {
+         $builder
+            ->filter($type, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
+      } else if ($mappingType == MappingType::ForeignKey_ChildParent) {
+         $field = Mapper::getReferenceColumnName($refType);
+         $builder
+            ->filter($type, 'id', \alat\common\ComparisonOperator::eq, $ref->$field);
+      } else if ($mappingType == MappingType::Association) {
+         $associationTable = Mapper::getAssociationTableName($refType, $type);
+
+         $builder
+            ->join($associationTable, Mapper::getReferenceColumnName($type), $type, 'id')
+            ->filter($associationTable, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);
+      }
+
+      return $builder;
+   }
+
    public function getCreateBuilder() {
       $builder = $this->builderFactory->create($this->type);
       foreach($this->model->getMetadata() as $name => $field) {
