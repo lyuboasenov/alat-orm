@@ -44,7 +44,7 @@ class ReadCommand extends \alat\fs\commands\Command {
 
             // only one join level is supported
             if ($type != $parentType) {
-               throw new \ErrorException('Odd join further debuging is needed.');
+               throw new \ErrorException('Odd join further debugging is needed.');
             }
 
             foreach($result[$this->filterType] as $ref) {
@@ -55,7 +55,7 @@ class ReadCommand extends \alat\fs\commands\Command {
          }
       } else {
          foreach(ReadCommand::getIds($this->path, $type) as $id) {
-            $model = ReadCommand::getFileContent($this->path, $this->filterType, $id);
+            $model = ReadCommand::getFileContent($this->path, $type, $id);
             $result[$type][] = $model;
          }
       }
