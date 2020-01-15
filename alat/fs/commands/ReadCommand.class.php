@@ -35,7 +35,7 @@ class ReadCommand extends \alat\fs\commands\Command {
          $result[$this->filterType] = array();
          foreach(ReadCommand::getIds($this->path, $this->filterType) as $id) {
             $model = ReadCommand::getFileContent($this->path, $this->filterType, $id);
-            if (\alat\common\ComparisonOperator::Compare($this->filterOperator, $this->filterValue, $model[$this->filterField])) {
+            if (!is_null($model) && \alat\common\ComparisonOperator::Compare($this->filterOperator, $this->filterValue, $model[$this->filterField])) {
                $result[$this->filterType][] = $model;
             }
          }
@@ -54,13 +54,18 @@ class ReadCommand extends \alat\fs\commands\Command {
             foreach($result[$this->filterType] as $ref) {
                // join are made only by id
                $id = $ref[$refField];
-               $result[$type][] = ReadCommand::getFileContent($this->path, $type, $id);
+               $model = ReadCommand::getFileContent($this->path, $type, $id);
+               if (!is_null($model)) {
+                  $result[$type][] = $model;
+               }
             }
          }
       } else {
          foreach(ReadCommand::getIds($this->path, $type) as $id) {
             $model = ReadCommand::getFileContent($this->path, $type, $id);
-            $result[$type][] = $model;
+            if (!is_null($model)) {
+               $result[$type][] = $model;
+            }
          }
       }
 
@@ -80,14 +85,16 @@ class ReadCommand extends \alat\fs\commands\Command {
    }
 
    public static function getIds($path, $type) {
-      return array_values(array_diff(scandir(\alat\io\Path::combine($path, $type)), ['.', '..']));
+      return \alat\io\Directory::getFiles(\alat\io\Path::combine($path, $type));
    }
 
    public static function getFileContent($path, $type, $id) {
-      $handle = fopen(\alat\io\Path::combine($path, $type, $id), 'r');
-      $content = fgets($handle);
-      fclose($handle);
+      $content = \alat\io\File::readAsString(\alat\io\Path::combine($path, $type, $id));
+      $result = null;
+      if (!is_null($content)) {
+         $result = json_decode($content, true);
+      }
 
-      return json_decode($content, true);
+      return $result;
    }
 }

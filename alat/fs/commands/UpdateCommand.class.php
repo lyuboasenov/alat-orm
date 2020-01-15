@@ -26,16 +26,10 @@ class UpdateCommand extends \alat\fs\commands\Command {
          }
       }
       ksort($this->fields);
-      $this->saveFileContent();
+      \alat\io\File::writeFile(\alat\io\Path::combine($this->path, $this->type, $this->id), json_encode($this->fields));
    }
 
    public function getId() {
       return $this->id;
-   }
-
-   private function saveFileContent() {
-      $handle = fopen(\alat\io\Path::combine($this->path, $this->type, $this->id), 'w');
-      fwrite($handle, json_encode($this->fields));
-      fclose($handle);
    }
 }

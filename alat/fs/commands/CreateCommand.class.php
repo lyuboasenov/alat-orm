@@ -19,34 +19,28 @@ class CreateCommand extends \alat\fs\commands\Command {
    public function execute() {
       parent::execute();
 
-      $handle = $this->getNextFileStream();
-      $this->fields['id'] = $this->id;
-      ksort($this->fields);
-      fwrite($handle, json_encode($this->fields));
-      fclose($handle);
-   }
-
-   private function getNextFileStream() {
       $id = 1;
 
       $path = \alat\io\Path::combine($this->path, $this->type);
-      $files = scandir($path, 1);
+      $files = \alat\io\Directory::getFiles($path);
+      $lastKey = array_key_last($files);
 
-      $firstKey = array_key_first($files);
-      $firstValue = $files[$firstKey];
-
-      if ($firstValue != '..') {
-         $id = intval($firstValue);
+      if (!is_null($lastKey)) {
+         $lastValue = $files[$lastKey];
+         $id = intval($lastValue);
       }
 
-      $handle = null;
+      $this->fields['id'] = $id;
+      ksort($this->fields);
+
+      $content = null;
       do {
          $id++;
-         $handle = fopen(\alat\io\Path::combine($this->path, $this->type, $id), 'w');
-      } while (!flock($handle, LOCK_EX));
+         $this->fields['id'] = $id;
+         $content = json_encode($this->fields);
+      } while(!\alat\io\File::writeNewFile(\alat\io\Path::combine($this->path, $this->type, $id), $content));
 
       $this->id = $id;
-      return $handle;
    }
 
    public function getId() {
