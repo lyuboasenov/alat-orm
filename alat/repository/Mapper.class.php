@@ -39,6 +39,9 @@ class Mapper {
    }
 
    public static function getAssociationTableName($type1, $type2) {
+      $type1 = \alat\common\Type::stripNamespace($type1);
+      $type2 = \alat\common\Type::stripNamespace($type2);
+
       if (strcmp($type1, $type2) < 0) {
          return $type1 . $type2;
       } else {
@@ -68,6 +71,7 @@ class Mapper {
       $builder = $this->getReadBuilder();
 
       $mappingType = Mapper::getMappingType($refType, $type);
+
       if ($mappingType == MappingType::ForeignKey_ParentChild) {
          $builder
             ->filter($type, Mapper::getReferenceColumnName($refType), \alat\common\ComparisonOperator::eq, $ref->id);

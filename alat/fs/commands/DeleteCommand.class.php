@@ -12,16 +12,20 @@ class DeleteCommand extends \alat\fs\commands\Command {
       $this->type = $type;
       $this->field = $field;
       $this->value = $value;
+
+      $this->command = 'delete (' . \alat\io\Path::combine($this->path, $this->type) . ') ' . $field . '=' . $value;
    }
 
    public function execute() {
+      parent::execute();
+
       if ($this->field == 'id') {
-         unlink($this->path . DIRECTORY_SEPARATOR . $this->type . DIRECTORY_SEPARATOR . $this->value);
+         unlink(\alat\io\Path::combine($this->path, $this->type, $this->value));
       } else {
          foreach(ReadCommand::getIds($this->path, $this->type) as $id) {
             $data = ReadCommand::getFileContent($this->path, $this->type, $id);
             if ($data[$this->field] == $this->value) {
-               unlink($this->path . DIRECTORY_SEPARATOR . $this->type . DIRECTORY_SEPARATOR . $id);
+               unlink(\alat\io\Path::combine($this->path, $this->type, $id));
             }
          }
       }

@@ -12,9 +12,13 @@ class CreateCommand extends \alat\fs\commands\Command {
       parent::__construct($path);
       $this->type = $type;
       $this->fields = $fields;
+
+      $this->command = 'create (' . \alat\io\Path::combine($this->path, $this->type) . ')';
    }
 
    public function execute() {
+      parent::execute();
+
       $handle = $this->getNextFileStream();
       $this->fields['id'] = $this->id;
       ksort($this->fields);
@@ -25,7 +29,7 @@ class CreateCommand extends \alat\fs\commands\Command {
    private function getNextFileStream() {
       $id = 1;
 
-      $path = $this->path . DIRECTORY_SEPARATOR . $this->type;
+      $path = \alat\io\Path::combine($this->path, $this->type);
       $files = scandir($path, 1);
 
       $firstKey = array_key_first($files);
@@ -38,11 +42,10 @@ class CreateCommand extends \alat\fs\commands\Command {
       $handle = null;
       do {
          $id++;
-         $handle = fopen($path . DIRECTORY_SEPARATOR . $id, 'w');
+         $handle = fopen(\alat\io\Path::combine($this->path, $this->type, $id), 'w');
       } while (!flock($handle, LOCK_EX));
 
       $this->id = $id;
-
       return $handle;
    }
 

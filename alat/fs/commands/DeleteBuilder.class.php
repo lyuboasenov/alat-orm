@@ -23,12 +23,8 @@ class DeleteBuilder extends CommandBuilder implements \alat\repository\commands\
 
    public function build(){
       $key = array_key_first($this->fields);
-      $id = $this->fields[$key];
+      $value = $this->fields[$key];
 
-      if ($key != 'id') {
-         $id = $key . '=' . $id;
-      }
-
-      return new DeleteCommand($this->path, $this->type, $id);
+      return new DeleteCommand($this->path, $this->type, $key, $value);
    }
 }

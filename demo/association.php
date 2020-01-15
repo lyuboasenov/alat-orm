@@ -36,7 +36,7 @@ $newChild = $updateParent->children->append($newChild);
 
 write('</div>');
 
-//$repository->save();
+$repository->save();
 
 function write($str) {
    echo $str;

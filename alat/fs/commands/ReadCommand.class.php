@@ -21,9 +21,13 @@ class ReadCommand extends \alat\fs\commands\Command {
       $this->filterField = $filterField;
       $this->filterOperator = $filterOperator;
       $this->filterValue = $filterValue;
+
+      $this->command = 'read (' . \alat\io\Path::combine($this->path, $type) . ')';
    }
 
    public function execute() {
+      parent::execute();
+
       $result = array();
       $type = array_key_first($this->types);
 
@@ -76,11 +80,11 @@ class ReadCommand extends \alat\fs\commands\Command {
    }
 
    public static function getIds($path, $type) {
-      return array_values(array_diff(scandir($path . $type), ['.', '..']));
+      return array_values(array_diff(scandir(\alat\io\Path::combine($path, $type)), ['.', '..']));
    }
 
    public static function getFileContent($path, $type, $id) {
-      $handle = fopen($path . $type . DIRECTORY_SEPARATOR . $id, 'r');
+      $handle = fopen(\alat\io\Path::combine($path, $type, $id), 'r');
       $content = fgets($handle);
       fclose($handle);
 
