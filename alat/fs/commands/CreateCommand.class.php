@@ -19,7 +19,7 @@ class CreateCommand extends \alat\fs\commands\Command {
    public function execute() {
       parent::execute();
 
-      $id = 1;
+      $id = 0;
 
       $path = \alat\io\Path::combine($this->path, $this->type);
       $files = \alat\io\Directory::getFiles($path);
