@@ -1,5 +1,4 @@
-!/.vs
-/.vs/*
-!/.vs/modulized-php/config
-!/.vs/ProjectSettings.json
-!/.vs/slnx.sqlite
+/demo/repo/*
+!/demo/repo/ChildEntity/1
+!/demo/repo/ChildEntity/2
+!/demo/repo/ParentEntity/1
