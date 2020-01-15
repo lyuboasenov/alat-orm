@@ -2,3 +2,6 @@
 !/demo/repo/ChildEntity/1
 !/demo/repo/ChildEntity/2
 !/demo/repo/ParentEntity/1
+!/demo/repo/MultiChildEntity/1
+!/demo/repo/MultiChildEntity/2
+!/demo/repo/MultiParentEntity/1
