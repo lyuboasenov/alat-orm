@@ -1,8 +1,8 @@
 <?php
 
-$connection = new alat\db\SqlConnection('connection-string');
+$connection = new \alat\db\SqlConnection('connection-string');
 
-//$repository = new alat\db\Repository($connection);
+//$repository = new \alat\db\Repository($connection);
 $repository = new \alat\fs\Repository(__DIR__ . '\\repo\\');
 
 write('<div> <h1>Foreign Key</h1>');
@@ -22,12 +22,12 @@ foreach($parents as $parent) {
    write('</div>');
 }
 
-$newParent = new demo\domain\models\ParentEntity();
+$newParent = new \demo\domain\models\ParentEntity();
 $newParent->name = 'new-parent';
 
 $newParent = $parentSet->add($newParent);
 
-$newChild = new demo\domain\models\ChildEntity();
+$newChild = new \demo\domain\models\ChildEntity();
 $newChild->name = 'new-child';
 $newChild = $newParent->children->append($newChild);
 

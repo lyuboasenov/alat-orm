@@ -1,13 +1,14 @@
 <?php
 
-$connection = new alat\db\SqlConnection('connection-string');
+$connection = new \alat\db\SqlConnection('connection-string');
 
-//$repository = new alat\db\Repository($connection);
+//$repository = new \alat\db\Repository($connection);
 $repository = new \alat\fs\Repository(__DIR__ . '\\repo\\');
+$set = $repository->getSet('demo\domain\models\MultiParentEntity');
 
 write('<div> <h1>Association</h1>');
 
-$parents = $repository->getSet('demo\domain\models\MultiParentEntity')->findById(12);
+$parents = $set->all();
 
 foreach($parents as $parent) {
    write('<div>');
@@ -18,15 +19,13 @@ foreach($parents as $parent) {
       write('<p><b>child:</b>' . $child->name . '</p>');
    }
 
-   write('<p><b>child:</b>' . $parent->children->elementAt(1)->name . '</p>');
-
    write('</div>');
 }
 
 $newParent = new demo\domain\models\MultiParentEntity();
 $newParent->name = 'new-parent';
 
-$newParent = $repository->getSet('demo\domain\models\MultiParentEntity')->add($newParent);
+$newParent = $set->add($newParent);
 
 $newChild = new demo\domain\models\MultiChildEntity();
 $newChild->name = 'new-child';
@@ -37,7 +36,7 @@ $newChild = $updateParent->children->append($newChild);
 
 write('</div>');
 
-$repository->save();
+//$repository->save();
 
 function write($str) {
    echo $str;
