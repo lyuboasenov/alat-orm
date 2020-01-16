@@ -12,4 +12,16 @@ class Directory {
 
       return $result;
    }
+
+   public static function getParent($path) {
+      return dirname($path);
+   }
+
+   public static function create($path) {
+      mkdir($path, 0777, true);
+   }
+
+   public static function exists($path) {
+      return file_exists($path) && is_dir($path);
+   }
 }

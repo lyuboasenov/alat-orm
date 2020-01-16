@@ -28,8 +28,6 @@ abstract class Model implements IModel {
       if (array_key_exists($name, $this->metadata)) {
          if ($this->metadata[$name] instanceof fields\ReferenceField) {
             throw new \ErrorException('Reference fields should not be handled by model base.');
-         } else if ($this->metadata[$name] instanceof fields\ForeignKeyField) {
-            return $this->values[$name]->id;
          } else {
             return $this->values[$name];
          }

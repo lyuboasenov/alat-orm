@@ -104,7 +104,7 @@ class Mapper {
    public function getUpdateBuilder() {
       $builder = $this->builderFactory->update($this->type);
       foreach($this->model->getMetadata() as $name => $field) {
-         if ($name != 'id' && !($field instanceof fields\ReferenceField) && !($field instanceof fields\ForeignKeyField)) {
+         if ($name != 'id' && !($field instanceof fields\ReferenceField)) {
             $builder->set($name, $this->model->$name);
          }
       }

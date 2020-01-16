@@ -1,10 +1,12 @@
 <?php
 
+$generator = new \alat\db\generation\Generator(__DIR__);
+
 write('<div> <h1>DB generation</h1>');
 
 write('<code>');
 
-write(alat\db\DbGenerator::getDbGenerationScript());
+write($generator->getInitializationScript());
 
 write('</code>');
 

@@ -37,6 +37,10 @@ class File {
    }
 
    public static function writeNewFile($path, $content) {
+      if (!Directory::exists(Directory::getParent($path))) {
+         Directory::create(Directory::getParent($path));
+      }
+
       $handle = File::open($path, 'x', true);
       if (!is_null($handle)) {
          fwrite($handle, $content);
@@ -49,6 +53,10 @@ class File {
    }
 
    public static function writeFile($path, $content) {
+      if (!Directory::exists(Directory::getParent($path))) {
+         Directory::create(Directory::getParent($path));
+      }
+
       $handle = File::open($path, 'c', true);
       if (!is_null($handle)) {
          ftruncate($handle, 0);
@@ -59,5 +67,9 @@ class File {
       } else {
          return false;
       }
+   }
+
+   public static function exists($path) {
+      return file_exists($path) && is_file($path);
    }
 }
