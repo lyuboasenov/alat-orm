@@ -13,4 +13,8 @@ abstract class ReferenceField extends Field {
    public function getReferenceType() {
       return $this->referenceType;
    }
+
+   protected function jsonSerializeAdditionalFields() {
+      return ['refType' => $this->getReferenceType()];
+   }
 }

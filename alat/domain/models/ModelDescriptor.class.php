@@ -12,4 +12,8 @@ abstract class ModelDescriptor implements IModelDescriptor {
 
       return $metadata;
    }
+
+   public function jsonSerialize() {
+        return [ 'name' => rtrim(\alat\common\Type::stripNamespace(get_class($this)), 'Descriptor'), 'fields' => $this->getFields() ];
+    }
 }

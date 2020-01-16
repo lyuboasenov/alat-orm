@@ -2,14 +2,17 @@
 
 namespace alat\db\generation;
 
+use alat\common\Type;
 use alat\domain\models\fields\ReferenceField;
 
 class Generator {
    private $logPath;
    private $log = array();
+   private $appPath;
 
-   public function __construct($path) {
-      $this->logPath = \alat\io\Path::combine($path, 'db', 'generation', 'log');
+   public function __construct($appPath) {
+      $this->appPath = $appPath;
+      $this->logPath = \alat\io\Path::combine($appPath, 'db', 'generation', 'log');
       $this->loadLog();
    }
 
@@ -18,18 +21,23 @@ class Generator {
    }
 
    public function getUpgradeScript($refPoint, $message) {
-      $script = $this->getCurrentScript();
-      $refScript = $this->getScript($refPoint);
+      $descriptors = $this->getCurrentModelDescriptors();
+      $refDescriptors = $this->getScript($refPoint);
 
-      if (!is_null($refScript)) {
-         $script = $this->makeDiff($refScript, $script);
-      }
+      // $script = null;
+      // if (!is_null($refDescriptors)) {
+      //    $script = $this->makeDiff($refScript, $script);
+      // }
 
-      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $script];
+      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $descriptors];
 
       $this->saveLog();
 
-      return $this->toSql($script);
+      echo '<pre>';
+      var_dump(json_encode($descriptors));
+      echo '</pre>';
+
+      //return $this->toSql($script);
    }
 
    public function getUpgradeLog() {
@@ -50,7 +58,7 @@ class Generator {
    }
 
    private function saveLog() {
-      \alat\io\File::writeFile($this->logPath, json_encode($this->log));
+      \alat\io\File::appendFile($this->logPath, json_encode($this->log));
    }
 
    private function getScript($refPoint) {
@@ -68,32 +76,19 @@ class Generator {
       return $script;
    }
 
-   private function getCurrentScript() {
-      $classes = get_declared_classes();
-      $tables = array();
-      $fks = array();
+   private function getCurrentModelDescriptors() {
+      $classes = Type::getTypes($this->appPath);
       $modelDescriptors = array();
-
-      echo '<pre>';
-      var_dump($classes);
-      echo '</pre>';
 
       foreach($classes as $class) {
          $reflect = new \ReflectionClass($class);
          if($reflect->implementsInterface('alat\domain\models\IModelDescriptor')
             && !$reflect->isAbstract()) {
-
-               var_dump(1);
-
-            $descriptor = new $class;
-            $modelDescriptors[] = $descriptor;
-
-            $descriptorName = \alat\common\Type::stripNamespace($class);
-            $tables[] = [rtrim($descriptorName, 'Descriptor'), $this->getColumns($descriptor)];
+            $modelDescriptors[] = new $class;
          }
       }
 
-      return ['tables' => $tables, 'fks' => $fks];
+      return $modelDescriptors;
    }
 
    private function getColumns($descriptor) {

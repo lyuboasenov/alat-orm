@@ -22,4 +22,8 @@ class DecimalField extends Field {
    public function isValid($value) {
       return is_double($value);
    }
+
+   protected function jsonSerializeAdditionalFields() {
+      return ['digits' => $this->getMaxDigits(), 'decimals' => $this->getDecimalPlaces()];
+   }
 }

@@ -69,6 +69,22 @@ class File {
       }
    }
 
+   public static function appendFile($path, $content) {
+      if (!Directory::exists(Directory::getParent($path))) {
+         Directory::create(Directory::getParent($path));
+      }
+
+      $handle = File::open($path, 'a', true);
+      if (!is_null($handle)) {
+         fwrite($handle, $content);
+         fclose($handle);
+
+         return true;
+      } else {
+         return false;
+      }
+   }
+
    public static function exists($path) {
       return file_exists($path) && is_file($path);
    }
