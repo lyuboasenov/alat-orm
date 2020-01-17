@@ -38,7 +38,6 @@ class Table implements \JsonSerializable {
                   $associationTable->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($modelType), false, null));
                   $associationTable->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($refType), false, null));
 
-                  $associationTable->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($refType), false, null));
                   $associationTable->fks[Mapper::getReferenceColumnName($modelType)] = \alat\common\Type::stripNamespace($modelType);
                   $associationTable->fks[Mapper::getReferenceColumnName($refType)] = \alat\common\Type::stripNamespace($refType);
 
@@ -58,7 +57,20 @@ class Table implements \JsonSerializable {
    }
 
    public static function buildSchemasFromArray($array) {
+      $tables = array();
+      foreach($array as $item) {
+         $table = new Table();
 
+         $table->name = $item['name'];
+         $table->columns = array();
+         foreach($item['columns'] as $column) {
+            $table->columns[] = Column::fromArray($column);
+         }
+         $table->fks = $item['fks'];
+         $tables[] = $table;
+      }
+
+      return $tables;
    }
 
    private static function fromDescriptor($descriptor) {
@@ -97,8 +109,8 @@ class Table implements \JsonSerializable {
 
       foreach($this->fks as $column => $table) {
          $script .= '   constraint \'fk_' . $this->getName() . '_' . $table . '\'' . Environment::newLine();
-         $script .= '      foreign key (' .  $column . ') references ' . $table . ' (id)';
-         $script .= '      on delete cascade';
+         $script .= '      foreign key (' .  $column . ') references ' . $table . ' (id)' . Environment::newLine();
+         $script .= '      on delete cascade' . Environment::newLine();
          $script .= '      on update cascade' . ',' . Environment::newLine();
       }
 

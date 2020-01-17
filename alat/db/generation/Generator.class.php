@@ -33,11 +33,11 @@ class Generator {
             $script .= $artefact->toSql() . Environment::newLine();
          }
       } else {
-
+         var_dump($refArtefacts);
       }
 
       $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbArtefacts];
-      $this->saveLog();
+      //$this->saveLog();
 
       return $script;
    }
@@ -46,7 +46,7 @@ class Generator {
       $result = array();
       foreach($this->log as $entry) {
          $result[] = array_filter($entry, function($key) {
-            return array_search($key, ['date', 'id', 'message']);
+            return array_search($key, ['date', 'id', 'message']) !== false;
          }, ARRAY_FILTER_USE_KEY);
       }
       return $result;
@@ -55,12 +55,12 @@ class Generator {
    private function loadLog() {
       if (\alat\io\file::exists($this->logPath)) {
          $content = \alat\io\File::readAsString($this->logPath);
-         $log = json_decode($content, true);
+         $this->log = json_decode($content, true, JSON_THROW_ON_ERROR | JSON_ERROR_SYNTAX);
       }
    }
 
    private function saveLog() {
-      \alat\io\File::appendFile($this->logPath, json_encode($this->log));
+      \alat\io\File::writeFile($this->logPath, json_encode($this->log));
    }
 
    private function getScript($refPoint) {
@@ -109,8 +109,6 @@ class Generator {
    }
 
    private function toSql($script) {
-      var_dump($script);
-
       return $script;
    }
 

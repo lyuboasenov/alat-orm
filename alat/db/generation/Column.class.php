@@ -38,8 +38,36 @@ abstract class Column implements \JsonSerializable {
       }
    }
 
+   public static function fromArray($array) {
+      $type = $array['type'];
+      $field = null;
+      $name = $array['name'];
+      $null = boolval($array['null']);
+      $default = $array['default'];
+
+      if ($type == 'IntegerColumn') {
+         $field = new IntegerField($name, $null, $default);
+      } else if ($type == 'BooleanColumn') {
+         $field = new BooleanField($name, $null, $default);
+      } else if ($type == 'CharColumn') {
+         $field = new CharField($name, $null, $default, $array['len']);
+      } else if ($type == 'DateTimeColumn') {
+         $field = new DateTimeField($name, $null, $default);
+      } else if ($type == 'DecimalColumn') {
+         $field = new DecimalField($name, $null, $default, $array['digits'], $array['decimals']);
+      } else if ($type == 'DoubleColumn') {
+         $field = new FloatField($name, $null, $default);
+      } else if ($type == 'TextColumn') {
+         $field = new TextField($name, $null, $default);
+      } else {
+         throw new \ErrorException('Unknown field ' . $field);
+      }
+
+      return Column::fromField($field);
+   }
+
    public function getSql() {
-      return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null ' : ' not null ') . ($this->field->getNull() || is_null($this->field->getDefault()) ? 'default null ' : 'default ' .   $this->field->getDefault());
+      return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null ' : ' not null ') . ($this->field->getNull() || is_null($this->field->getDefault()) ? 'default null' : 'default ' .   $this->field->getDefault());
    }
 
    public function jsonSerialize() {
