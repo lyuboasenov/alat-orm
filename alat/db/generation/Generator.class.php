@@ -24,19 +24,31 @@ class Generator {
    public function getUpgradeScript($refPoint, $message) {
       $descriptors = $this->getModelDescriptors();
 
-      $currentStateDbArtefacts = $this->getCurrentArtefacts($descriptors);
-      $refArtefacts = $this->getArtefactsByRef($refPoint);
+      $currentStateDbTables = $this->getCurrentTables($descriptors);
+      $refTables = $this->getTablesByRef($refPoint);
 
       $script = '';
-      if (is_null($refArtefacts)) {
-         foreach($currentStateDbArtefacts as $artefact) {
-            $script .= $artefact->toSql() . Environment::newLine();
+      if (is_null($refTables)) {
+         foreach($currentStateDbTables as $table) {
+            $script .= $table->toCreateSql() . Environment::newLine();
          }
       } else {
-         var_dump($refArtefacts);
+         foreach($refTables as $table) {
+            if (!array_key_exists($table->getName(), $currentStateDbTables)) {
+               $script .= $table->toDropSql() . Environment::newLine();
+            }
+         }
+
+         foreach($currentStateDbTables as $table) {
+            if (!array_key_exists($table->getName(), $refTables)) {
+               $script .= $table->toCreateSql() . Environment::newLine();
+            } else {
+               $script .= $table->toUpdateSql($refTables[$table->getName()]) . Environment::newLine();
+            }
+         }
       }
 
-      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbArtefacts];
+      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbTables];
       //$this->saveLog();
 
       return $script;
@@ -44,10 +56,12 @@ class Generator {
 
    public function getUpgradeLog() {
       $result = array();
-      foreach($this->log as $entry) {
-         $result[] = array_filter($entry, function($key) {
-            return array_search($key, ['date', 'id', 'message']) !== false;
-         }, ARRAY_FILTER_USE_KEY);
+      if (!is_null($this->log)) {
+         foreach($this->log as $entry) {
+            $result[] = array_filter($entry, function($key) {
+               return array_search($key, ['date', 'id', 'message']) !== false;
+            }, ARRAY_FILTER_USE_KEY);
+         }
       }
       return $result;
    }
@@ -112,11 +126,11 @@ class Generator {
       return $script;
    }
 
-   private function getCurrentArtefacts($descriptors) {
+   private function getCurrentTables($descriptors) {
       return Table::buildSchemas($descriptors);
    }
 
-   private function getArtefactsByRef($ref) {
+   private function getTablesByRef($ref) {
       $result = null;
       if (!is_null($ref)) {
          $entry = $this->getLogEntryById($ref);

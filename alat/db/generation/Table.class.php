@@ -9,8 +9,6 @@ use alat\repository\Mapper;
 use alat\repository\MappingType;
 
 class Table implements \JsonSerializable {
-   private $descriptor;
-
    private $modelType;
    private $name;
    private $columns = array();
@@ -67,7 +65,7 @@ class Table implements \JsonSerializable {
             $table->columns[] = Column::fromArray($column);
          }
          $table->fks = $item['fks'];
-         $tables[] = $table;
+         $tables[$table->getName()] = $table;
       }
 
       return $tables;
@@ -75,11 +73,10 @@ class Table implements \JsonSerializable {
 
    private static function fromDescriptor($descriptor) {
       $table = new Table();
-      $table->descriptor = $descriptor;
-      $table->modelType = Table::getModelType($table->descriptor);
+      $table->modelType = Table::getModelType($descriptor);
       $table->name = \alat\common\Type::stripNamespace($table->modelType);
 
-      $table->build();
+      $table->build($descriptor);
       return $table;
    }
 
@@ -99,8 +96,8 @@ class Table implements \JsonSerializable {
       return $this->fks;
    }
 
-   public function toSql($update = false) {
-      $script = ($update ? 'alter' : 'create') . ' table ' . $this->getName() . ' (';
+   public function toCreateSql() {
+      $script = 'create table ' . $this->getName() . ' (';
       $script .= Environment::newLine();
 
       foreach($this->getColumns() as $column) {
@@ -114,13 +111,21 @@ class Table implements \JsonSerializable {
          $script .= '      on update cascade' . ',' . Environment::newLine();
       }
 
-
-
       $script = rtrim($script);
       $script = rtrim($script, ',');
       $script .= ');';
 
       return $script;
+   }
+
+   public function toUpdateSql($refTable) {
+      foreach($refTable->columns as $column) {
+
+      }
+   }
+
+   public function toDropSql() {
+      return 'drop table ' . $this->getName() . ';';
    }
 
    public function jsonSerialize() {
@@ -131,9 +136,9 @@ class Table implements \JsonSerializable {
       ];
    }
 
-   private function build() {
+   private function build($descriptor) {
       $this->columns = array();
-      foreach($this->descriptor->getFields() as $field) {
+      foreach($descriptor->getFields() as $field) {
          if ($field instanceof ReferenceField) {
             $mappingType = Mapper::getMappingType($this->modelType, $field->getReferenceType());
             if ($mappingType == MappingType::ForeignKey_ChildParent) {

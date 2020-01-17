@@ -28,7 +28,7 @@ write('</pre>');
 
 write('<pre>');
 write('<h2>DB upgrade</h2>');
-write($generator->getUpgradeScript('5e21c98b0c9c7', 'Upgrade 1'));
+write($generator->getUpgradeScript('5e21cdb16a09c', 'Upgrade script'));
 write('</pre>');
 
 write('</div>');
