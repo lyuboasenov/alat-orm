@@ -10,6 +10,10 @@ class DateTimeColumn extends Column {
    }
 
    public function getSql() {
-      return  $this->field->getName() . ' tinyint(1)';
+      return  $this->field->getName() . ' datetime';
+   }
+
+   protected function getSqlType() {
+      return 'datetime';
    }
 }

@@ -4,6 +4,7 @@ namespace alat\db\generation;
 
 use alat\common\Type;
 use alat\domain\models\fields\ReferenceField;
+use alat\Environment;
 
 class Generator {
    private $logPath;
@@ -21,23 +22,24 @@ class Generator {
    }
 
    public function getUpgradeScript($refPoint, $message) {
-      $descriptors = $this->getCurrentModelDescriptors();
-      $refDescriptors = $this->getScript($refPoint);
+      $descriptors = $this->getModelDescriptors();
 
-      // $script = null;
-      // if (!is_null($refDescriptors)) {
-      //    $script = $this->makeDiff($refScript, $script);
-      // }
+      $currentStateDbArtefacts = $this->getCurrentArtefacts($descriptors);
+      $refArtefacts = $this->getArtefactsByRef($refPoint);
 
-      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $descriptors];
+      $script = '';
+      if (is_null($refArtefacts)) {
+         foreach($currentStateDbArtefacts as $artefact) {
+            $script .= $artefact->toSql() . Environment::newLine();
+         }
+      } else {
 
+      }
+
+      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbArtefacts];
       $this->saveLog();
 
-      echo '<pre>';
-      var_dump(json_encode($descriptors));
-      echo '</pre>';
-
-      //return $this->toSql($script);
+      return $script;
    }
 
    public function getUpgradeLog() {
@@ -76,7 +78,7 @@ class Generator {
       return $script;
    }
 
-   private function getCurrentModelDescriptors() {
+   private function getModelDescriptors() {
       $classes = Type::getTypes($this->appPath);
       $modelDescriptors = array();
 
@@ -110,5 +112,33 @@ class Generator {
       var_dump($script);
 
       return $script;
+   }
+
+   private function getCurrentArtefacts($descriptors) {
+      return Table::buildSchemas($descriptors);
+   }
+
+   private function getArtefactsByRef($ref) {
+      $result = null;
+      if (!is_null($ref)) {
+         $entry = $this->getLogEntryById($ref);
+         if (!is_null($entry)) {
+            $result = Table::buildSchemasFromArray($entry['data']);
+         }
+      }
+
+      return $result;
+   }
+
+   private function getLogEntryById($id) {
+      $result = null;
+      foreach($this->log as $entry) {
+         if ($entry['id'] == $id) {
+            $result = $entry;
+            break;
+         }
+      }
+
+      return $result;
    }
 }

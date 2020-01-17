@@ -11,7 +11,7 @@ use alat\domain\models\fields\IntegerField;
 use alat\domain\models\fields\FloatField;
 use alat\domain\models\fields\TextField;
 
-abstract class Column {
+abstract class Column implements \JsonSerializable {
    protected $field;
 
    protected function __construct(Field $field) {
@@ -38,5 +38,19 @@ abstract class Column {
       }
    }
 
-   public abstract function getSql();
+   public function getSql() {
+      return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null ' : ' not null ') . ($this->field->getNull() || is_null($this->field->getDefault()) ? 'default null ' : 'default ' .   $this->field->getDefault());
+   }
+
+   public function jsonSerialize() {
+      return array_merge(
+         ['type' => \alat\common\Type::stripNamespace(get_class($this)), 'name' => $this->field->getName(), 'null' => $this->field->getNull(), 'default' => $this->field->getDefault()],
+         $this->jsonSerializeAdditionalFields());
+   }
+
+   protected function jsonSerializeAdditionalFields() {
+      return array();
+   }
+
+   protected abstract function getSqlType();
 }

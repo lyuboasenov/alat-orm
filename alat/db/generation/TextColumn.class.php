@@ -9,7 +9,7 @@ class TextColumn extends Column {
       parent::__construct($field);
    }
 
-   public function getSql() {
-      return  $this->field->getName() . ' text';
+   protected function getSqlType() {
+      return 'text charset utf8';
    }
 }

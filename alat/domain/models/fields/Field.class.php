@@ -2,9 +2,7 @@
 
 namespace alat\domain\models\fields;
 
-use alat\common\Type;
-
-abstract class Field implements \JsonSerializable {
+abstract class Field {
    private $name;
    private $default;
    private $null;
@@ -28,14 +26,4 @@ abstract class Field implements \JsonSerializable {
    }
 
    public abstract function isValid($value);
-
-   public function jsonSerialize() {
-      return array_merge(
-         ['type' => Type::stripNamespace(get_class($this)), 'name' => $this->name, 'null' => $this->null, 'default' => $this->default],
-         $this->jsonSerializeAdditionalFields());
-   }
-
-   protected function jsonSerializeAdditionalFields() {
-      return array();
-   }
 }

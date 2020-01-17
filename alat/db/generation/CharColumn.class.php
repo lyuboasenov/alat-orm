@@ -5,12 +5,18 @@ namespace alat\db\generation;
 use alat\domain\models\fields\CharField;
 
 class CharColumn extends Column {
+   private $charField;
+
    public function __construct(CharField $field) {
       parent::__construct($field);
+      $this->charField = $field;
    }
 
-   public function getSql() {
-      $charField = (CharField) ($this->field);
-      return  $this->field->getName() . ' varchar(' . $charField->getMaxLength() . ')';
+   protected function jsonSerializeAdditionalFields() {
+      return ['len' => $this->charField->getMaxLength()];
+   }
+
+   protected function getSqlType() {
+      return ' varchar(' . $this->charField->getMaxLength() . ') charset utf8';
    }
 }

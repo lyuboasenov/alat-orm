@@ -17,8 +17,4 @@ class CharField extends Field {
    public function isValid($value) {
       return is_string($value) && strlen($value) <= $this->maxLength;
    }
-
-   protected function jsonSerializeAdditionalFields() {
-      return ['len' => $this->getMaxLength()];
-   }
 }

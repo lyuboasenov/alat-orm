@@ -2,14 +2,14 @@
 
 namespace alat\db\generation;
 
-use alat\domain\models\fields\BooleanField;
+use alat\domain\models\fields\FloatField;
 
 class DoubleColumn extends Column {
-   public function __construct(BooleanField $field) {
+   public function __construct(FloatField $field) {
       parent::__construct($field);
    }
 
-   public function getSql() {
-      return  $this->field->getName() . ' double';
+   protected function getSqlType() {
+      return 'double';
    }
 }

@@ -9,7 +9,7 @@ class BooleanColumn extends Column {
       parent::__construct($field);
    }
 
-   public function getSql() {
-      return  $this->field->getName() . ' tinyint(1)';
+   protected function getSqlType() {
+      return 'tinyint(1)';
    }
 }

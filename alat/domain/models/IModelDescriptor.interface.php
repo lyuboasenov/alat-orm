@@ -2,7 +2,7 @@
 
 namespace alat\domain\models;
 
-interface IModelDescriptor extends \JsonSerializable {
+interface IModelDescriptor {
    public function getFields();
    public function getMetadata();
 }

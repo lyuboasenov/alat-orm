@@ -34,7 +34,7 @@ class Mapper {
       } else if ($refToSourceField instanceof fields\OneOfReferenceField) {
          return MappingType::ForeignKey_ChildParent;
       } else {
-         throw new \ErrorException('Unkown reference from "' . $sourceType . '" to "' . $refType . '".');
+         return MappingType::None;
       }
    }
 
@@ -136,4 +136,5 @@ abstract class MappingType {
    const Association = 0;
    const ForeignKey_ParentChild = 1;
    const ForeignKey_ChildParent = 2;
+   const None = 3;
 }

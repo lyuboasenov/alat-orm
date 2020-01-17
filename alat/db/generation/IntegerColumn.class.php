@@ -13,7 +13,11 @@ class IntegerColumn extends Column {
       if ($this->field->getName() == 'id') {
          return  'id bigint auto_increment primary key';
       } else {
-         return  $this->field->getName() . ' int';
+         return parent::getSql();
       }
+   }
+
+   protected function getSqlType() {
+      return 'int';
    }
 }
