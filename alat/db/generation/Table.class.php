@@ -33,8 +33,10 @@ class Table implements \JsonSerializable {
                   $associationTable = new Table();
                   $associationTable->name = Mapper::getAssociationTableName($modelType, $refType);
                   $associationTable->columns = array();
-                  $associationTable->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($modelType), false, null));
-                  $associationTable->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($refType), false, null));
+                  $column1 = Mapper::getReferenceColumnName($modelType);
+                  $column2 = Mapper::getReferenceColumnName($refType);
+                  $associationTable->columns[$column1] = new IntegerColumn(new IntegerField($column1, false, null));
+                  $associationTable->columns[$column2] = new IntegerColumn(new IntegerField($column2, false, null));
 
                   $associationTable->fks[Mapper::getReferenceColumnName($modelType)] = \alat\common\Type::stripNamespace($modelType);
                   $associationTable->fks[Mapper::getReferenceColumnName($refType)] = \alat\common\Type::stripNamespace($refType);
@@ -43,7 +45,7 @@ class Table implements \JsonSerializable {
                }
             } else if ($mappingType == MappingType::ForeignKey_ParentChild) {
                $columnName = Mapper::getReferenceColumnName($refType);
-               $table->columns[] = new IntegerColumn(new IntegerField($columnName, false, null));
+               $table->columns[$columnName] = new IntegerColumn(new IntegerField($columnName, false, null));
                $table->fks[$columnName] = \alat\common\Type::stripNamespace($refType);
             }
          }
@@ -62,7 +64,8 @@ class Table implements \JsonSerializable {
          $table->name = $item['name'];
          $table->columns = array();
          foreach($item['columns'] as $column) {
-            $table->columns[] = Column::fromArray($column);
+            $columnObj = Column::fromArray($column);
+            $table->columns[$columnObj->getName()] = $columnObj;
          }
          $table->fks = $item['fks'];
          $tables[$table->getName()] = $table;
@@ -119,9 +122,74 @@ class Table implements \JsonSerializable {
    }
 
    public function toUpdateSql($refTable) {
-      foreach($refTable->columns as $column) {
+      $removedColumns = array();
+      $newColumns = array();
+      $updateColumns = array();
 
+      $removedFks = array();
+      $addedFks = array();
+
+      $result = '';
+
+      foreach($refTable->columns as $name => $column) {
+         if (!array_key_exists($name, $this->columns)) {
+            $removedColumns[$name] = $column;
+         }
       }
+
+      foreach($this->columns as $name => $column) {
+         if (!array_key_exists($name, $refTable->columns)) {
+            $newColumns[$name] = $column;
+         } else if ($column->getSql() != $refTable->columns[$name]->getSql()) {
+            $updateColumns[$name] = $column;
+         }
+      }
+
+      foreach($refTable->fks as $column => $table) {
+         if (!array_key_exists($column, $this->fks)) {
+            $removedFks[$column] = $table;
+         }
+      }
+
+      foreach($this->fks as $column => $table) {
+         if (!array_key_exists($column, $refTable->fks)) {
+            $removedFks[$column] = $table;
+         }
+      }
+
+      if (count($removedColumns) > 0
+         || count($newColumns) > 0
+         || count($updateColumns) > 0
+         || count($addedFks) > 0
+         || count($removedFks) > 0) {
+         $result = 'alter table ' . $this->getName() . ' modify ' . Environment::newLine();
+
+         foreach($removedColumns as $name => $column) {
+            $result .= '   drop column ' . $name . ',' . Environment::newLine();
+         }
+
+         foreach($newColumns as $name => $column) {
+            $result .= '   add column ' . $column->getSql() . ',' . Environment::newLine();
+         }
+
+         foreach($updateColumns as $name => $column) {
+            $result .= '   modify column ' . $column->getSql() . ',' . Environment::newLine();
+         }
+
+         foreach($removedFks as $column => $table) {
+            $result .= '   drop foreign key fk_' . $this->getName() . '_' . $table . ',' . Environment::newLine();
+         }
+
+         foreach($addedFks as $column => $table) {
+            $result .= '   add foreign key fk_' . $this->getName() . '_' . $table . '(' .  $column . ') references ' . $table . ' (id),' . Environment::newLine();
+         }
+
+         $result = rtrim($result);
+         $result = rtrim($result, ',');
+         $result .= ';' . Environment::newLine();
+      }
+
+      return $result;
    }
 
    public function toDropSql() {
@@ -142,10 +210,12 @@ class Table implements \JsonSerializable {
          if ($field instanceof ReferenceField) {
             $mappingType = Mapper::getMappingType($this->modelType, $field->getReferenceType());
             if ($mappingType == MappingType::ForeignKey_ChildParent) {
-               $this->columns[] = new IntegerColumn(new IntegerField(Mapper::getReferenceColumnName($field->getReferenceType()), true, null));
+               $columnName = Mapper::getReferenceColumnName($field->getReferenceType());
+               $this->columns[$columnName] = new IntegerColumn(new IntegerField($columnName, true, null));
             }
          } else {
-            $this->columns[] = Column::fromField($field);
+            $column = Column::fromField($field);
+            $this->columns[$column->getName()] = $column;
          }
       }
    }

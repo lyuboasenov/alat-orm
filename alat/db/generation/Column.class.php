@@ -66,6 +66,10 @@ abstract class Column implements \JsonSerializable {
       return Column::fromField($field);
    }
 
+   public function getName() {
+      return $this->field->getName();
+   }
+
    public function getSql() {
       return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null ' : ' not null ') . ($this->field->getNull() || is_null($this->field->getDefault()) ? 'default null' : 'default ' .   $this->field->getDefault());
    }

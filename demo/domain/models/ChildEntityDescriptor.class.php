@@ -9,6 +9,7 @@ class ChildEntityDescriptor extends models\ModelDescriptor {
       return [
          new fields\IntegerField('id', false, null),
          new fields\CharField('name', false, null, 50),
+         new fields\CharField('fullName', false, null, 50),
       ];
    }
 }
