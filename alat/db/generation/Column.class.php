@@ -71,7 +71,7 @@ abstract class Column implements \JsonSerializable {
    }
 
    public function getSql() {
-      return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null ' : ' not null ') . ($this->field->getNull() || is_null($this->field->getDefault()) ? 'default null' : 'default ' .   $this->field->getDefault());
+      return $this->field->getName() . ' ' . $this->getSqlType() . ($this->field->getNull() ? ' null' : ' not null') . (is_null($this->field->getDefault()) ? '' : ' default ' .   $this->field->getDefault());
    }
 
    public function jsonSerialize() {

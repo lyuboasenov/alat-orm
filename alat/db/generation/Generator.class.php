@@ -30,6 +30,9 @@ class Generator {
 
       $script = '';
       if (is_null($refTables)) {
+         uasort($currentStateDbTables, function ($f, $s) {
+            return count($f->getFks()) < count($s->getFks()) ? -1 : 1;
+         });
          foreach($currentStateDbTables as $table) {
             $script .= $table->toCreateSql() . Environment::newLine();
          }
@@ -56,11 +59,13 @@ class Generator {
          if (is_null($refPoint)) {
             $revisionScript .= 'create table _revisions_ (' . Environment::newLine() .
                '   revision varchar(13) charset utf8 not null,' .Environment::newLine() .
-               '   date timestamp not null default NOW(),' .Environment::newLine() .
+               '   date timestamp not null default NOW()' .Environment::newLine() .
                ');' . Environment::newLine();
          } else {
-            $revisionScript .= 'set @lastRevision = (select top 1 revision from _revision_ order by date desc);' . Environment::newLine();
-            $revisionScript .= 'if lastRevision <> \'' . $refPoint . '\' then signal sqlstate \'45000\' set message_text \'DB revision differece the expected ' . $refPoint . '\'; endif;' . Environment::newLine();
+            $revisionScript .= 'set @lastRevision = (select revision from _revisions_ order by date desc limit 1);' . Environment::newLine();
+            $revisionScript .= 'delimiter $$' . Environment::newLine();
+            $revisionScript .= 'if @lastRevision != \'' . $refPoint . '\' then signal sqlstate \'45000\' set message_text = \'DB revision differece the expected ' . $refPoint . '\'; end if$$' . Environment::newLine();
+            $revisionScript .= 'delimiter ;' . Environment::newLine();
          }
 
          $revisionScript .= 'insert into _revisions_ (revision) values (\'' . $id . '\');' . Environment::newLine();
@@ -68,7 +73,7 @@ class Generator {
          $script = $revisionScript . $script;
 
          $this->log[] = ['id' => $id, 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbTables];
-         //$this->saveLog();
+         $this->saveLog();
       }
 
       return $script;

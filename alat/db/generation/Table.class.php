@@ -107,8 +107,14 @@ class Table implements \JsonSerializable {
          $script .= '   ' . $column->getSql() . ',' . Environment::newLine();
       }
 
+      if (count($this->fks) == 0) {
+         $script = rtrim($script);
+         $script = rtrim($script, ',');
+         $script .= Environment::newLine();
+      }
+
       foreach($this->fks as $column => $table) {
-         $script .= '   constraint \'fk_' . $this->getName() . '_' . $table . '\'' . Environment::newLine();
+         $script .= '   constraint `fk_' . $this->getName() . '_' . $table . '`' . Environment::newLine();
          $script .= '      foreign key (' .  $column . ') references ' . $table . ' (id)' . Environment::newLine();
          $script .= '      on delete cascade' . Environment::newLine();
          $script .= '      on update cascade' . ',' . Environment::newLine();
@@ -162,7 +168,7 @@ class Table implements \JsonSerializable {
          || count($updateColumns) > 0
          || count($addedFks) > 0
          || count($removedFks) > 0) {
-         $result = 'alter table ' . $this->getName() . ' modify ' . Environment::newLine();
+         $result = 'alter table ' . $this->getName() . Environment::newLine();
 
          foreach($removedColumns as $name => $column) {
             $result .= '   drop column ' . $name . ',' . Environment::newLine();

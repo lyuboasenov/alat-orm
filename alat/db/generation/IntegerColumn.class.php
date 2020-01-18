@@ -18,6 +18,10 @@ class IntegerColumn extends Column {
    }
 
    protected function getSqlType() {
-      return 'int';
+      if (strpos($this->field->getName(), '_id')) {
+         return 'bigint';
+      } else {
+         return 'int';
+      }
    }
 }
