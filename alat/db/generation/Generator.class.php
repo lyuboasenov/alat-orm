@@ -22,6 +22,7 @@ class Generator {
    }
 
    public function getUpgradeScript($refPoint, $message) {
+      $id = uniqid();
       $descriptors = $this->getModelDescriptors();
 
       $currentStateDbTables = $this->getCurrentTables($descriptors);
@@ -48,8 +49,27 @@ class Generator {
          }
       }
 
-      $this->log[] = ['id' => uniqid(), 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbTables];
-      //$this->saveLog();
+      if ($script != '') {
+
+         $revisionScript = '';
+
+         if (is_null($refPoint)) {
+            $revisionScript .= 'create table _revisions_ (' . Environment::newLine() .
+               '   revision varchar(13) charset utf8 not null,' .Environment::newLine() .
+               '   date timestamp not null default NOW(),' .Environment::newLine() .
+               ');' . Environment::newLine();
+         } else {
+            $revisionScript .= 'set @lastRevision = (select top 1 revision from _revision_ order by date desc);' . Environment::newLine();
+            $revisionScript .= 'if lastRevision <> \'' . $refPoint . '\' then signal sqlstate \'45000\' set message_text \'DB revision differece the expected ' . $refPoint . '\'; endif;' . Environment::newLine();
+         }
+
+         $revisionScript .= 'insert into _revisions_ (revision) values (\'' . $id . '\');' . Environment::newLine();
+
+         $script = $revisionScript . $script;
+
+         $this->log[] = ['id' => $id, 'date' => getdate(), 'message' => $message, 'data' => $currentStateDbTables];
+         //$this->saveLog();
+      }
 
       return $script;
    }
